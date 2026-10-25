@@ -1,0 +1,78 @@
+/* A bounded house canvas; lists paginate rather than creating nested scroll areas. */
+body:not(.at-home){height:100dvh;overflow:hidden}
+.house-screen{position:absolute;inset:0 auto auto 0;transform-origin:top left;width:100%;height:100dvh}
+body:not(.at-home) .house-screen .app-header{height:60px;min-height:0;padding:6px 12px;margin:0 0 0 236px;max-width:none;flex-wrap:nowrap;box-sizing:border-box}
+body:not(.at-home) .house-screen .timebox{order:initial;width:auto;flex-shrink:0;margin:0;padding:6px 10px}
+body:not(.at-home) .house-screen .game-shell{height:calc(100% - 60px);margin:0 0 0 236px;padding:0 12px 8px;max-width:none;box-sizing:border-box;display:grid;grid-template-rows:minmax(0,1fr) 30px 20px;gap:6px}
+.house-screen .dashboard{height:100%;min-height:0;max-height:none;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}
+.house-screen .house-panel{min-height:0}.house-screen .house-toolbar{min-height:45px;padding:8px 12px;flex-shrink:0}
+.house-screen .map-wrap{padding:4px 6px 24px;align-content:start;container-type:size}
+.house-screen .map{width:min(100%,calc((100cqh - 24px)*1.5));max-width:none;aspect-ratio:3/2}
+.house-screen .map-note{font-size:9px}.house-screen .house-title h1{font-size:20px}
+.house-screen .collective{padding:8px}.house-screen .resident-heading{margin-bottom:6px}.house-screen #roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.house-screen .roster-item{padding:7px;min-width:0}.house-screen .roster-item .avatar{width:27px;height:27px}.house-screen .roster-text strong{font-size:12px}.house-screen .roster-text small{font-size:10px}.house-screen .roster-refusal{font-size:9px}
+.house-screen .dashboard-rail{min-height:0;gap:7px;display:flex;flex-direction:column}.house-screen .week-panel-top{padding:10px;min-height:0}.house-screen .story-banner{padding:9px;min-height:0}.house-screen .story-banner strong{font-size:12px}
+.house-screen .rail-tabs{padding:3px;gap:3px}.house-screen .rail-tabs button{padding:6px 3px}.house-screen .rail-tabs button span{margin-top:3px;font-size:10px}
+.house-screen .songbook{height:auto;min-height:0}.house-screen .panel-head,.house-screen .rail-title{padding:10px 12px}.house-screen .panel-head h2,.house-screen .rail-title h2{font-size:19px}.house-screen .song-metrics{padding:7px 12px}.house-screen .songbook-toolbar{padding:6px 10px}
+.house-screen .song-grid,.house-screen .rail-scroll{display:flex;flex-direction:column;min-height:0;overflow:hidden;gap:7px;flex:1}
+.page-items{flex:none;min-width:0;display:flex;flex-direction:column;gap:8px}.house-screen .song-card{padding:10px;flex-shrink:0}.house-screen .musician-summary{padding:10px}.house-screen .member-activity{margin:7px 0}.house-screen .member-intent,.house-screen .member-refusal{margin-top:5px}
+.house-screen .house-left-rail{position:absolute;top:12px;bottom:12px;left:12px;width:212px;height:auto;max-height:none;overflow:hidden;display:block;margin:0}.left-content{width:100%;display:flex;flex-direction:column;gap:10px;transform-origin:top left}
+.house-screen .guidance-content{padding:10px}.house-screen .guidance-content h3{font-size:16px;margin:6px 0}.house-screen .guidance-content p{line-height:1.35;margin:7px 0}
+.house-screen #groupActivities{display:block;padding:9px}.house-screen #groupActivities h2,.house-screen #groupActivities h3{margin:6px 0;font-size:10px}.house-screen .group-activity,.house-screen .group-waiting{padding:8px;margin-top:6px}.house-screen .activity-people{gap:3px;margin-top:5px}.house-screen .activity-people>span{font-size:11px;padding:2px 3px}.house-screen .activity-song{margin-top:4px}.house-screen .activity-time{margin:6px 0 4px}
+.list-pages{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:5px;flex-shrink:0;min-height:27px}.list-pages span{font-size:11px;color:#64775b;font-variant-numeric:tabular-nums}.list-pages button{padding:2px 12px;font-size:20px;line-height:1.1;box-shadow:none}.list-pages button:disabled{opacity:.3;cursor:default}
+.house-screen .activity-drawer{margin:0;min-height:0}.house-screen .activity-drawer>summary{height:30px;box-sizing:border-box;padding:6px 12px}.house-screen .activity-drawer[open]{position:absolute;left:248px;right:12px;bottom:34px;z-index:30;height:min(430px,65%);background:#f0f4e9f5;backdrop-filter:blur(18px);box-shadow:0 -8px 40px #233b3425;border-radius:14px}.house-screen .activity-content{height:calc(100% - 30px);padding:10px;box-sizing:border-box;grid-template-columns:1fr 1fr;min-height:0}.house-screen .journal,.house-screen .decision-tracker{display:flex;flex-direction:column;min-height:0;overflow:hidden}.house-screen #logs,.house-screen .order-list{height:auto;max-height:none;min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden}.house-screen footer{padding:0 2px;font-size:8px;min-height:0}.house-screen footer button{padding:1px 6px;font-size:9px}
+.house-screen .schedule-now{padding:10px 12px}.house-screen .schedule-now strong{font-size:18px}.house-screen .calendar-scroll{padding:8px}.calendar-content{flex:none}.house-screen .next-show-card{padding:10px;margin-bottom:8px}.house-screen .next-show-card h3{font-size:17px;margin:4px 0}.house-screen .next-show-card p{margin:4px 0}.house-screen .calendar-month{padding:8px;margin-bottom:7px}.house-screen .calendar-month p{margin:5px 0}.house-screen .calendar-weeks li{min-height:42px;padding:6px 1px}.house-screen .calendar-weeks span{margin-top:4px}.house-screen .calendar-note{margin:5px 0}.house-screen .audience-hint{margin-top:5px;padding:6px}.house-screen .audience-hint small{font-size:9px}.house-screen .calendar-month .audience-hint{padding:3px;margin-top:4px}.house-screen .past-shows h3{margin:7px 0}.house-screen .past-shows>button{padding:5px}
+.house-screen #influenceNotice{position:fixed;top:9px;left:calc(50% + 100px);width:min(540px,60%);padding:11px 15px;z-index:40}
+.house-screen [hidden]{display:none!important}
+
+body.at-home{overflow:hidden}body.at-home .house-screen{display:none!important}body.at-home #startScreen{height:100dvh;min-height:0;overflow:hidden;padding:20px;box-sizing:border-box}
+
+.house-screen #influenceNotice{padding-right:43px}
+#influenceNotice .notice-close{position:absolute;right:7px;top:7px;width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #ffffff99;border-radius:9px;background:#ffffff70;color:#365440;font-size:22px;line-height:1;box-shadow:none;pointer-events:auto;cursor:pointer}
+#influenceNotice .notice-close:hover{background:#fff;color:#203d2a}
+#influenceNotice .notice-close:focus-visible{outline:2px solid #365440;outline-offset:2px}
+/* v25: rhythm belongs to the house; the right rail keeps its natural text size. */
+body:not(.at-home) .house-screen .game-shell{display:block;padding-bottom:12px}
+.house-screen .dashboard{height:100%}
+.house-screen .house-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;min-height:68px}
+.house-screen .house-title{flex-wrap:wrap;column-gap:7px;row-gap:3px;max-width:180px}.house-screen .house-title h1{font-size:18px}.house-screen #houseState{font-size:10px}
+.house-screen .house-toolbar #weekPanel{min-width:0;align-self:stretch;background:transparent;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;justify-content:center;border-left:1px solid #cfdbc5;padding-left:12px}
+.house-screen #weekPanel .week-panel-top{padding:0 0 5px;min-height:0;gap:5px}.house-screen #weekPanel .week-panel-top .eyebrow{display:none}.house-screen #weekPanel .week-panel-top strong{font-size:12px;margin:0;line-height:1.3}.house-screen #weekPanel .week-panel-actions{gap:3px}.house-screen #weekPanel button{padding:4px 6px;font-size:11px}
+.house-screen #weekPanel .week-timeline{border:0;background:transparent;gap:6px}.house-screen #weekPanel .week-stop{padding:2px 0;border:0;font-size:10px;gap:4px}.house-screen #weekPanel .week-stop b{font-size:10px}.house-screen #weekPanel .show-day-plan{flex-wrap:wrap;gap:4px;font-size:9px}
+.house-screen .dashboard-rail .song-grid,.house-screen .dashboard-rail .rail-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-gutter:stable;overscroll-behavior:contain;display:flex;flex-direction:column}
+.house-screen .dashboard-rail .page-items,.house-screen .dashboard-rail .calendar-content{zoom:1;flex-shrink:0}
+.house-screen .header-tools{gap:5px}.house-screen .header-tools>button{font-size:11px;padding:7px}.house-screen .header-tools .activity-drawer{position:static;height:auto;min-height:0;background:transparent;border:0;box-shadow:none}
+.house-screen .header-tools .activity-drawer>summary{height:auto;list-style:none;padding:7px;font-size:11px;border-radius:9px;white-space:nowrap;cursor:pointer;color:#526a46}.house-screen .activity-drawer>summary::-webkit-details-marker{display:none}.house-screen .activity-drawer>summary:hover{background:#ffffff80}.house-screen .activity-drawer[open]>summary{background:#dce8d1}
+.house-screen .header-tools .activity-drawer[open]{position:static;height:auto;background:transparent;box-shadow:none;backdrop-filter:none}
+.house-screen .header-tools .activity-content{position:absolute;top:62px;right:12px;left:248px;height:min(430px,70%);z-index:35;background:#f0f4e9f5;border:1px solid #ffffffb0;border-radius:14px;backdrop-filter:blur(18px);box-shadow:0 14px 40px #233b3430;grid-template-rows:auto minmax(0,1fr);gap:8px}
+.activity-count{grid-column:1/-1;font-size:11px;color:#6b7c60}.house-screen .header-tools .activity-content .journal,.house-screen .header-tools .activity-content .decision-tracker{grid-row:2}
+#saveStatus:not([hidden]){position:absolute;top:62px;right:12px;z-index:40;background:#fff0d8;padding:8px;border-radius:8px;font-size:11px}
+/* Compact personal activity stacks; the expanded view overlays the house. */
+.house-screen .collective{position:relative;overflow:visible}
+.house-screen #roster .roster-item{height:132px;display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:28px 18px minmax(0,1fr);gap:3px 6px;padding:7px 9px;text-align:left;align-content:start;overflow:hidden}
+.house-screen #roster .avatar{grid-row:1;grid-column:1}
+.house-screen #roster .roster-text{grid-row:1;grid-column:2;min-width:0;align-self:center}
+.house-screen #roster .roster-text strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;font-size:12px}
+.house-screen #roster .resident-vitals{grid-row:2;grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;margin:0;padding:0}
+.house-screen #roster .vital-row{display:flex;gap:4px;font-size:10px}.house-screen #roster .vital-row small{display:none}
+.personal-stack{grid-column:1/-1;grid-row:3;display:flex;flex-direction:column;min-width:0;gap:3px;font-size:10px;color:#52694a}
+.personal-current,.personal-next,.personal-direction{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:15px}
+.personal-current{font-weight:650;color:#355640}.personal-next{color:#8b7958}.personal-direction{border-top:1px solid #d6dfce;padding-top:2px;margin-top:auto}.personal-direction.active{color:#426f40}
+.personal-progress,.personal-progress-spacer{height:3px;display:block;flex-shrink:0}.personal-progress{background:#e0e6d9;border-radius:3px;overflow:hidden}.personal-progress i{display:block;height:100%;background:#789969}
+.house-screen #rosterExpansion{position:absolute;bottom:calc(100% + 7px);left:8px;width:min(390px,calc(100% - 16px));max-height:min(370px,42vh);z-index:42;background:#f7faeffa;border:1px solid #c4d4b9;border-radius:14px;box-shadow:0 -8px 35px #283d3230;backdrop-filter:blur(15px);padding:11px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;color:#36513d;text-align:left}
+.stack-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.stack-heading strong{font-size:13px}.stack-heading button{font-size:20px;padding:0 7px;box-shadow:none}.stack-details{overflow-y:auto;min-height:0;overscroll-behavior:contain;scrollbar-width:thin}.stack-details section{padding:9px;border-radius:9px;margin-bottom:6px;background:#e5efdc}.stack-details .stack-wait{background:#f0eadc}.stack-details .stack-background{background:#ebefe4}.stack-details small{display:block;font-size:10px;color:#6c7c61}.stack-details strong{display:block;font-size:13px;margin:4px 0}.stack-details p{font-size:11px;margin:5px 0;line-height:1.4}.stack-song{display:block;font-size:12px}.stack-details progress{width:100%;height:5px;accent-color:#75966a}.stack-refusal{color:#986d49}#stackPersonSheet{font-size:11px;padding:6px;flex-shrink:0}
+
+/* Card occasions: stable layout, a finite arrival flourish and persistent contrast. */
+.house-screen #storyBanner{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:12px;border:1px solid #d9a740;background:linear-gradient(115deg,#fff5cbf5,#f5e5a9ed 55%,#e5eee4ed);box-shadow:0 0 0 2px #edcb7350,0 5px 18px #775b2026;border-radius:12px;padding:10px 12px;min-width:0}
+.house-screen #storyBanner[hidden]{display:none}
+#storyBanner .occasion-copy{min-width:0;flex:1}#storyBanner .eyebrow{color:#835018;font-size:9px;font-weight:850;letter-spacing:1px}#storyBanner strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#44311a;margin-top:4px}
+#storyBanner .occasion-cards{position:relative;width:43px;height:40px;flex:0 0 43px;animation:occasion-pop .6s cubic-bezier(.2,.8,.3,1.3)}
+.occasion-cards i{position:absolute;width:24px;height:32px;border:1px solid #b67c2e;border-radius:5px;background:#f7dfa0;left:9px;top:4px;box-shadow:0 2px 4px #69471830;transform:rotate(-17deg) translateX(-6px)}.occasion-cards i:nth-child(2){transform:rotate(16deg) translateX(6px);background:#d4dfcd}.occasion-cards i:last-child{transform:none;display:grid;place-items:center;background:linear-gradient(140deg,#fffbe6,#edc96f);color:#8c5b20;font-size:19px;font-style:normal}
+#storyBanner .occasion-cta{position:relative;overflow:hidden;flex-shrink:0;white-space:nowrap;background:#855b24;color:#fffbea;border:1px solid #71501e;box-shadow:0 3px 0 #63431d,0 0 14px #e9b85170;font-size:11px;padding:10px 12px;transition:transform .15s,box-shadow .15s;animation:occasion-glow 1.8s ease-in-out 3}
+#storyBanner .occasion-cta::after{content:'';position:absolute;inset:-80% auto -80% -60%;width:25%;background:linear-gradient(90deg,transparent,#ffffff65,transparent);transform:rotate(22deg);animation:occasion-shine 2s ease-out 3;pointer-events:none}
+#storyBanner .occasion-cta:hover{transform:translateY(-2px);box-shadow:0 5px 0 #63431d,0 0 20px #e9b85190}#storyBanner .occasion-cta:active{transform:translateY(1px);box-shadow:0 1px 0 #63431d}#storyBanner .occasion-cta:focus-visible{outline:3px solid #376c67;outline-offset:3px}
+@keyframes occasion-pop{from{opacity:0;transform:translateY(8px) rotate(-12deg) scale(.7)}to{opacity:1;transform:none}}@keyframes occasion-glow{50%{box-shadow:0 3px 0 #63431d,0 0 22px #d99a37b0}}@keyframes occasion-shine{0%,20%{left:-60%}80%,100%{left:140%}}
+.reduce-motion #storyBanner *, .reduce-motion #storyBanner *::after{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){#storyBanner *,#storyBanner *::after{animation:none!important;transition:none!important}}
+
+.house-screen #storyBanner{display:grid;grid-template-columns:43px minmax(0,1fr);gap:5px 11px}#storyBanner .occasion-cards{grid-row:1/3}#storyBanner .occasion-copy{grid-column:2}#storyBanner .occasion-cta{grid-column:2;justify-self:start;padding:8px 11px}#storyBanner .occasion-copy strong{font-size:12px}

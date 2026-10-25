@@ -1,0 +1,10 @@
+(function(root){
+'use strict';
+const N=root.MaisonNames||(typeof require==='function'?require('./names.js'):null);
+const trios=[{name:'Le garage électrique',note:'Une voix, des riffs et du rythme.',instruments:['Chant','Guitare','Batterie']},{name:'Les mélodies du salon',note:'Une voix portée par les touches et le tempo.',instruments:['Chant','Clavier','Batterie']},{name:'Le moteur à trois',note:'Cordes, basses et batterie en conversation.',instruments:['Guitare','Basse','Batterie']},{name:'La maison cuivrée',note:'Du souffle, des couleurs et des percussions.',instruments:['Saxophone','Trompette','Percussions']}];
+const pick=(xs,rng)=>xs[Math.min(xs.length-1,Math.floor(rng()*xs.length))];
+function profile(id,instrument,rng=Math.random,usedNames=[]){const gender=rng()<.5?'female':'male';const traits=[pick(['Créatif','Minutieux','Spontané'],rng),pick(['Sociable','Solitaire','Bienveillant'],rng),pick(['Ambitieuse','Paresseux','Sensible','Énergique'],rng)];return {id,instrument,gender,name:N.musician(usedNames,gender,rng),traits,color:pick(['#bd663f','#6c8272','#81769c','#bf9854','#638897','#aa7180'],rng),skin:pick(['#efbd95','#c68c68','#a96c4e','#784e3c','#f0c19a'],rng),hair:pick(['#493127','#242727','#884f2c','#bca471','#604a69'],rng),style:pick(['Indie','Jazz','Pop','Folk','Ska','Punk'],rng),want:pick(['Terminer une chanson','Trouver une nouvelle idée','Faire vibrer le garage','Rencontrer des partenaires'],rng)};}
+function draft(index,rng=Math.random){const profiles=[];for(const instrument of trios[index].instruments)profiles.push(profile(root.MaisonSim.PEOPLE[profiles.length].id,instrument,rng,profiles.map(p=>p.name)));return profiles;}
+function create(profiles,selected){const s=root.MaisonSim.create(3,profiles);s.playerId=profiles[selected].id;for(const p of s.people){p.room=p.bedroomId;p.action='rest';p.remaining=1;p.waking=true;}root.MaisonGoals.init(s);return s;}
+root.MaisonCasting={trios,profile,draft,create};if(typeof module!=='undefined')module.exports=root.MaisonCasting;
+})(globalThis);
