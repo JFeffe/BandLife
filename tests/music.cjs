@@ -16,3 +16,12 @@ const eState=blank();M.queue(eState,{type:'reward',personId:'lea',title:'Reward'
 // Save migration retains people, affinities, clock, unfinished progress and old song history.
 const legacy=blank();delete legacy.music;legacy.version=1;legacy.tick=123;legacy.project=61;legacy.songs=7;legacy.people[0].style='Rock';legacy.people[1].interests=['Soul'];legacy.relations={'lea:max':4};legacy.people.forEach(p=>delete p.deck);M.init(legacy,true);assert.equal(legacy.version,2);assert.equal(legacy.tick,123);assert.equal(legacy.music.legacySongs,7);assert.equal(legacy.music.songs[0].progress,61);assert.equal(legacy.people[0].style,'Indie');assert.deepEqual(legacy.people[1].interests,['Pop']);assert.equal(legacy.relations['lea:max'],4);const saved=JSON.stringify(legacy);M.init(legacy,true);assert.equal(JSON.stringify(legacy),saved);
 const round=JSON.parse(JSON.stringify(s));M.init(round,true);assert.deepEqual(round.music,s.music);assert.deepEqual(round.people[0].deck,s.people[0].deck);console.log('PASS migration non destructive v1 → v2 et persistance des chansons/paquets.');
+
+// Real completed rehearsals: faster progress, actual attendance and a hard 100% cap.
+for(const [turns,gain] of [[3,35],[4,28],[5,23],[6,20]]){
+ const state=blank(),song=M.newSong(state,['lea'],'Jazz',yes,{progress:100});Object.assign(song,{adopted:true,turns,preparation:10});const quality=song.quality;
+ assert(M.requestPractice(state,song.id,yes));ticks(state,9,yes);assert.equal(song.preparation,10+gain);assert.equal(song.quality,quality);assert.equal(song.turns,turns);
+}
+const partial=blank(),partialSong=M.newSong(partial,['lea'],'Jazz',yes,{progress:100});Object.assign(partialSong,{adopted:true,turns:3,preparation:10});assert(M.sessionFromIntent(partial,partialSong.id,partial.people.slice(0,2).map(p=>p.id)));ticks(partial,9,yes);assert.equal(partialSong.preparation,33);
+partialSong.preparation=90;assert(M.sessionFromIntent(partial,partialSong.id,partial.people.map(p=>p.id)));ticks(partial,9,yes);assert.equal(partialSong.preparation,100);assert(M.ready(partialSong));assert(!M.requestPractice(partial,partialSong.id,yes));
+console.log('PASS faster complete rehearsals, proportional absences, unchanged song quality/capacity and readiness capped at 100%.');

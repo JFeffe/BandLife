@@ -14,9 +14,15 @@ s=S.create(6);assert(J.options(s).every(o=>o.reward!=='meeting'));const saved=JS
 // Existing history is not scored again, and an already active show is not changed.
 s=S.create();delete s.journey;s.tour.completed=[{week:8,id:'old'}];s.tick=8*144;J.init(s);assert.equal(s.journey.history.length,0);assert.equal(s.journey.chances,3);assert(s.journey.nextWeek>=16);
 console.log('PASS three losses/no-song failure, six-member reward fallback, save stability and old history migration.');
-// S8 → S16 → S17, including announced dates, real preparation and retry scheduling.
-s=S.create();assert.equal(J.stageWeek(s,2),17);ready(s);J.choose(s,'radio');show(s);assert.equal(s.journey.nextWeek,16);nextMorning(s);J.claimCard(s,s.people[0].id);J.choose(s,'electric');show(s);assert.equal(s.journey.nextWeek,17);assert.equal(J.stageWeek(s,2),17);nextMorning(s);J.claimCard(s,s.people[0].id);assert(J.choose(s,'headliner'));assert(T.scheduled(s,17));assert(T.ensureDue(s),'Finale starts on the very next morning after choosing its route');show(s,'lost');assert.equal(s.journey.nextWeek,18);
-// Only an unplayed legacy finale is brought forward; no past show or active show is rewritten.
-s=S.create();Object.assign(s.journey,{version:1,stage:2,nextWeek:24,history:[{stage:1,week:16}],selected:{id:'headliner',week:24}});s.tick=15*144+87;J.init(s);assert.equal(s.journey.nextWeek,17);assert.equal(s.journey.selected.week,17);assert.equal(s.journey.version,3);
-s.journey.version=1;s.journey.nextWeek=24;s.journey.selected.week=24;s.tick=19*144+20;J.init(s);assert.equal(s.journey.nextWeek,21,'Do not schedule a migrated show in the past or halfway through the current day');
-console.log('PASS final show next week, announced dates, immediate next-morning preparation, retry and safe legacy migration.');
+// S8 → S16 → S20: a full month to prepare the finale, including retries.
+s=S.create();assert.equal(J.stageWeek(s,2),20);ready(s);J.choose(s,'radio');show(s);assert.equal(s.journey.nextWeek,16);nextMorning(s);J.claimCard(s,s.people[0].id);J.choose(s,'electric');show(s);assert.equal(s.journey.nextWeek,20);assert.equal(J.stageWeek(s,2),20);nextMorning(s);J.claimCard(s,s.people[0].id);assert(J.choose(s,'headliner'));assert(T.scheduled(s,20));assert(!T.ensureDue(s),'The next morning remains available for preparation');show(s,'lost');assert.equal(s.journey.nextWeek,24);
+// Old saves retain people, songs and accepted conditions; only future finale dates move.
+s=S.create();Object.assign(s.journey,{version:1,stage:2,nextWeek:24,history:[{stage:1,week:16}],selected:{id:'headliner',week:24}});s.tick=15*144+87;J.init(s);assert.equal(s.journey.nextWeek,20);assert.equal(s.journey.selected.week,20);assert.equal(s.journey.version,4);
+s.journey.version=1;s.journey.nextWeek=24;s.journey.selected.week=24;s.tick=19*144+20;J.init(s);assert.equal(s.journey.nextWeek,21,'Never schedule a migrated show in the past or halfway through the current day');
+for(const activeWeek of [null,16,17]){
+ s=S.create();ready(s);Object.assign(s.journey,{version:3,stage:2,nextWeek:17,history:[{act:0,stage:1,week:16}],selected:{id:'headliner',week:17,fans:6,resistance:50}});s.tick=16*144;
+ if(activeWeek)s.tour.active={week:activeWeek};const people=JSON.stringify(s.people),songs=JSON.stringify(s.music.songs);J.init(s);
+ assert.equal(s.journey.nextWeek,activeWeek===17?17:20);assert.equal(s.journey.selected.week,s.journey.nextWeek);assert.equal(s.journey.selected.fans,6);assert.equal(s.journey.selected.resistance,50);assert.equal(JSON.stringify(s.people),people);assert.equal(JSON.stringify(s.music.songs),songs);const saved=JSON.stringify(s);J.init(s);assert.equal(JSON.stringify(s),saved);
+}
+s=S.create();Object.assign(s.journey,{version:3,stage:2,nextWeek:18,history:[{act:0,stage:2,week:17,success:false}]});J.init(s);assert.equal(s.journey.nextWeek,21);
+console.log('PASS four-week finales and retries, announced dates, preparation time, idempotent save migration and uninterrupted active concerts.');

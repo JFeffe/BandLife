@@ -40,7 +40,7 @@ try{
   if(s.tick===700){s=JSON.parse(JSON.stringify(s));M.init(s,true);D.init(s);W.init(s,true);T.init(s);J.init(s);}
  }
  console.log('Chronological playthrough:',JSON.stringify(report));
- assert(steps<10000,'No stalled choices');assert(report.some(x=>x.week===17),'Reach the local finale on schedule');
+ assert(steps<10000,'No stalled choices');assert(report.some(x=>x.week===20),'Reach the local finale on schedule');
  assert(report.every(x=>x.ready>0),'Prepare actual songs before every departure');
  assert.equal(s.journey.history.length,report.length);
  assert(s.journey.act===1||s.journey.status==='lost','Resolve the first act through actual show outcomes');

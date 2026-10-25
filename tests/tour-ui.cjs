@@ -87,7 +87,7 @@ els.set('journeyTimeline',new Element('journeyTimeline'));ctx.homeOpen=true;ctx.
 run('journey-ui.js');const journeyUI=ctx.window.MaisonJourneyUI;
 ctx.state=S.create();J.choose(ctx.state,'radio');journeyUI.render();
 const timeline=$('#journeyTimeline');assert.match(timeline.innerHTML,/Concert dans 7 sem/);
-for(const date of [8,16,17])assert(timeline.innerHTML.includes('<b>S'+date+'</b>'));
+for(const date of [8,16,20])assert(timeline.innerHTML.includes('<b>S'+date+'</b>'));
 assert.match(timeline.innerHTML,/aria-current="step"/);const overview=$('#journeyOverview');
 journeyUI.render();assert.equal($('#journeyOverview'),overview,'Do not rebuild the focused toolbar link each tick');
 ctx.state.tick=3*144;journeyUI.render();assert.match(timeline.innerHTML,/Concert dans 4 sem/);
@@ -98,7 +98,7 @@ assert.match(timeline.innerHTML,/data-week="15"/);
 $('#journeyOverview').onclick();assert($('#dialog').open);assert.match($('#dialogContent').innerHTML,/Le club des découvertes/);$('#dialog').close();
 ctx.state.tick=17*144;Object.assign(ctx.state.journey,{stage:2,nextWeek:18,selected:null});journeyUI.render();assert.match(timeline.innerHTML,/<b>S18<\/b>/);
 ctx.state.journey.history.push({act:0,stage:1,week:16,success:false});journeyUI.render();assert(!timeline.innerHTML.includes('Affirmer son style'),'Completed milestones are omitted');
-Object.assign(ctx.state.journey,{act:1,stage:0,firstWeek:25,nextWeek:25,actStarts:[8,25]});journeyUI.render();assert.match(timeline.innerHTML,/Scène nationale/);assert.match(timeline.innerHTML,/<b>S34<\/b>/);
+Object.assign(ctx.state.journey,{act:1,stage:0,firstWeek:25,nextWeek:25,actStarts:[8,25]});journeyUI.render();assert.match(timeline.innerHTML,/Scène nationale/);assert.match(timeline.innerHTML,/<b>S37<\/b>/);
 ctx.state.tour.active={phase:'stage',week:25};journeyUI.render();assert.match(timeline.innerHTML,/Concert · S25/);
 ctx.state.journey.status='won';journeyUI.render();assert.match(timeline.innerHTML,/Victoire mondiale/);assert(!timeline.innerHTML.includes('aria-current="step"'));
 ctx.state.journey.status='lost';journeyUI.render();assert.match(timeline.innerHTML,/Tournée terminée/);

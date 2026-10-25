@@ -12,6 +12,7 @@ const atHour=(s,h)=>(Math.floor((W().total(s)-480)/1440)*1440+h*60-s.calendar.ba
 const activity=s=>({preparing:'Se prépare pour le show',coffee:'Prend un café avec le groupe',packing:'Prépare son instrument',departing:'Part au show',stage:'Au show',result:'Au show',returning:'Rentre du show',unpacking:'Range son instrument'}[s.tour?.active?.phase]||'');
 function init(s){
  const week=W().week(s),minute=W().minute(s);
+ if(s.tour?.active?.live)s.tour.active.live.groupName='Band Life';
  if(!s.tour)s.tour={version:4,firstShowWeek:Math.max(8,Math.ceil(week/8)*8+(week%8===0&&minute!==480?8:0)),active:null,completed:[]};
  if(s.tour.version<4){
   const a=s.tour.active;
@@ -37,7 +38,7 @@ function audienceRandom(s,week,salt=0){let n=((s.tour?.audienceSeed||1)^Math.imu
 function forecast(s,week){const route=root.MaisonJourney?.destination(s,week);if(route)return {week,styles:[...route.styles],label:route.name,uncertainty:'Affinités annoncées · quelques goûts restent inconnus.'};const random=audienceRandom(s,week),styles=[...M().GENRES];for(let i=styles.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[styles[i],styles[j]]=[styles[j],styles[i]];}const count=1+Math.floor(random()*3);return {week,styles:styles.slice(0,count),label:count===1?'Public plutôt '+styles[0]:count===2?'Deux grandes affinités':'Public éclectique',uncertainty:'Tendances estimées · une partie du public reste inconnue.'};}
 function audience(s,week){const f=forecast(s,week),random=audienceRandom(s,week,1979);return Array.from({length:root.MaisonJourney?.destination(s,week)?.fans||8},(_,i)=>({id:'spectator-'+i,genre:random()<.72?f.styles[Math.floor(random()*f.styles.length)]:M().GENRES[Math.floor(random()*M().GENRES.length)]}));}
 function setlist(s){return s.music.songs.filter(M().ready).sort((a,b)=>b.quality-a.quality||b.turns-a.turns);}
-function eligibility(s){init(s);return {ok:false,reason:busy(s)?activity(s)+'.':isShowWeek(s)?'Journée de show : préparation dès 8 h, café ensemble, départ à 11 h et retour à 22 h.':'Shows ordinaires tous les deux mois; finale la semaine suivant le deuxième show. Départ à 11 h, retour à 22 h.'};}
+function eligibility(s){init(s);return {ok:false,reason:busy(s)?activity(s)+'.':isShowWeek(s)?'Journée de show : préparation dès 8 h, café ensemble, départ à 11 h et retour à 22 h.':'Shows ordinaires tous les deux mois; finale quatre semaines après le deuxième show. Départ à 11 h, retour à 22 h.'};}
 function homePhase(s,phase){const a=s.tour.active;a.phase=phase;s.people.forEach(p=>{if(p.bathroom){p.bathroom.room=phase==='preparing'?root.MaisonHouse.bedroom(p):phase==='coffee'?'kitchen':'garage';return;}p.sleeping=false;p.room=phase==='preparing'?root.MaisonHouse.bedroom(p):phase==='coffee'?'kitchen':'garage';p.action=phase==='preparing'?'rest':phase==='coffee'?'talk':'practice';p.travel=0;p.remaining=3;});}
 function prepare(s){
  const a=s.tour.active={id:'show-week-'+W().week(s),month:month(s),week:W().week(s),phase:'preparing',departTick:atHour(s,11),endTick:atHour(s,22),automatic:true,forecast:forecast(s,W().week(s)),people:s.people.map(p=>p.id),songs:[],result:null};
@@ -58,11 +59,11 @@ function interceptStep(s,rng=Math.random){if(!ensureDue(s))return false;const a=
 function arriveAtVenue(s){const a=s.tour?.active;if(!a||a.phase!=='departing')return false;a.deck??=M().cards.concertDeck(s,a.people);a.phase='stage';return true;}
 function cardEffects(s,uid,context={}){const a=s.tour?.active,card=a?.deck?.find(c=>c.uid===uid);const energy=a?.live?.actors.find(p=>p.id===card?.personId)?.needs.energy??card?.energy;return card?M().cards.effects(card.cardId,energy,{...context,personId:card.personId}):null;}
 function startLive(s){
- const a=s.tour?.active;if(!a||a.phase!=='stage'||!a.songs.length)return null;if(a.live){a.live.actors.forEach(p=>p.maisonProfile=true);return a.live;}
+ const a=s.tour?.active;if(!a||a.phase!=='stage'||!a.songs.length)return null;if(a.live){a.live.groupName='Band Life';a.live.actors.forEach(p=>p.maisonProfile=true);return a.live;}
  a.deck??=M().cards.concertDeck(s,a.people);a.energyBefore=Object.fromEntries(a.people.map(id=>[id,s.people.find(p=>p.id===id).energy]));
  const people=a.people.map((id,index)=>{const p=s.people.find(p=>p.id===id);return {id:p.id,name:p.name,instrument:M().cards.instrumentKey(p),genre:p.style,color:p.color||'#a795c8',identity:p.identity||{accessory:['hair','glasses','cap'][index%3],movement:S().has(p,'spontan')?'flamboyant':S().has(p,'solitaire')?'shy':'calm'},personality:{},skill:0,needs:{energy:p.energy},bandLiveDeck:a.deck.filter(c=>c.personId===id).map(c=>c.cardId==='note'?'note':c.cardId.split('-').at(-1))};});
  const seed=((s.tour.audienceSeed||1)^Math.imul(a.week,2654435761))>>>0;
- a.live=B().createBandLive({people,groupId:'maison',groupName:'La Maison des Accords',songs:a.songs.map(x=>({...x,style:x.genre})),seed,audienceSize:root.MaisonJourney?.destination(s,a.week)?.fans||8,audienceRules:{styles:[...M().GENRES],resistancePercent:root.MaisonJourney?.destination(s,a.week)?.resistance||65},freeSetlist:true});
+ a.live=B().createBandLive({people,groupId:'maison',groupName:'Band Life',songs:a.songs.map(x=>({...x,style:x.genre})),seed,audienceSize:root.MaisonJourney?.destination(s,a.week)?.fans||8,audienceRules:{styles:[...M().GENRES],resistancePercent:root.MaisonJourney?.destination(s,a.week)?.resistance||65},freeSetlist:true});
  a.audience??=audience(s,a.week);a.live.fans.forEach((f,i)=>f.favorite=a.audience[i].genre);a.live.actors.forEach(p=>p.maisonProfile=true);return a.live;
 }
 function syncEnergy(s){const a=s.tour?.active;if(!a?.live)return;for(const actor of a.live.actors){const p=s.people.find(p=>p.id===actor.id);if(p)p.energy=actor.needs.energy;}}

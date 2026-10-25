@@ -1,6 +1,6 @@
-# BandLife — La Maison des Accords
+# Band Life
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 38** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 39** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -39,6 +39,17 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 39 — Band Life, concerts et répétitions
+
+Le jeu s’appelle **Band Life** dans l’accueil, l’en-tête, les concerts et les titres de page. L’identité du site, son adresse et les clés de sauvegarde restent stables pour conserver les parties existantes.
+
+- Deux spectateurs supplémentaires par destination : publics de 6 à 10 personnes. Résistance individuelle inchangée; les contrats déjà choisis conservent leur public.
+- Finale d’acte quatre semaines après le deuxième show : S8, S16, S20 pour l’acte local. Une nouvelle tentative de finale laisse aussi quatre semaines. Les finales futures des sauvegardes sont reportées, sans déplacer un concert en cours.
+- Répétition avec tout le groupe : +35 / +28 / +23 / +20 points de préparation pour une chanson de 3 / 4 / 5 / 6 tours (environ 40 % de mieux). Les absences réduisent toujours le gain; la préparation plafonne à 100 %.
+- Reconstruction BandLive compatible avec les fins de ligne Windows; sources amont et rendu original préservés.
+
+Validation : 37 suites de régression, dont neuf campagnes complètes gagnées par les trois parcours de récompenses, les migrations de finales, les concerts en cours et les gains réels de répétition. Le contrôle avec chansons débutantes échoue toujours dans les actes avancés.
 
 ## Prototype 38 — les semaines à venir, sans espace perdu
 
