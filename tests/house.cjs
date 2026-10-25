@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const S=require('../dist/sim.js'),M=require('../dist/music.js'),D=require('../dist/decisions.js'),H=require('../dist/house.js'),W=require('../dist/weeks.js');
+for(const count of [3,4,5,6]){const s=S.create(count),bedrooms=s.people.map(p=>p.bedroomId);assert.equal(new Set(bedrooms).size,count);for(let i=1;i<=6;i++)assert(H.occupants(s,'bedroom'+i).length<=1);s.tick=96;s.calendar.nextAt=1440;W.afterStep(s);W.choose(s,'sleep',()=>0);assert(s.people.every(p=>p.sleeping&&p.room===p.bedroomId));const places=s.people.map(p=>H.position(s,p).join(','));assert.equal(new Set(places).size,count);const loaded=JSON.parse(JSON.stringify(s));H.init(loaded);assert.deepEqual(loaded.people.map(p=>p.bedroomId),bedrooms);assert(W.skipNight(loaded));assert(loaded.people.every(p=>H.rooms[p.room]));}
+console.log('PASS six chambres : attribution à 3/4/5/6, une chambre par musicien, positions distinctes et nuit/sauvegarde cohérentes.');
+const s=S.create(),initial=s.people.map(p=>p.bedroomId);S.recruit(s,'zoe');S.recruit(s,'sacha');S.recruit(s,'noe');assert.deepEqual(s.people.slice(0,3).map(p=>p.bedroomId),initial);assert.equal(s.people[3].bedroomId,'bedroom4');assert.equal(s.people[4].bedroomId,'bedroom5');assert.equal(s.people[5].bedroomId,'bedroom6');
+const legacy=JSON.parse(JSON.stringify(s));legacy.people.forEach(p=>{delete p.bedroomId;p.room='bedroom';});legacy.calendar.night={people:legacy.people.map(p=>({id:p.id,resume:{room:'bedroom'}}))};H.init(legacy);assert(legacy.people.every(p=>p.room===p.bedroomId));assert(legacy.calendar.night.people.every(p=>H.rooms[p.resume.room]));
+for(const p of s.people){s.tick=90;S.start(s,p,'rest');assert.equal(p.room,p.bedroomId);const path=H.path('garage',p.room,H.position(s,p));assert.deepEqual(path[0],H.rooms.garage.door);assert.deepEqual(path.at(-2),H.rooms[p.room].door);assert(path.every(([x,y])=>x>=0&&x<=H.WIDTH&&y>=0&&y<=H.HEIGHT));}
+console.log('PASS invitations sans réattribution, migration ancienne chambre, repos assigné et trajets par le couloir.');
+
+for(const [minute,phase] of [[0,'night'],[479,'night'],[480,'morning'],[599,'morning'],[600,'day'],[1019,'day'],[1020,'evening'],[1439,'evening']])assert.equal(H.lightPhase(minute),phase);
+console.log('PASS lumière : avant 10 h, de 10 h à 17 h, après 17 h et nuit, frontières incluses.');

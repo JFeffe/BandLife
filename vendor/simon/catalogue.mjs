@@ -1,0 +1,46 @@
+import {personCard} from './person-card.mjs?v=0.8.15';
+import {songTurns,songQualityHTML} from './song-rules.mjs?v=0.8.15';
+import {groupLinkHTML} from './group-link.mjs?v=0.8.15';
+import {stamp,SKILLS} from './engine.mjs?v=0.8.15';
+export const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const authorName=(s,x,id)=>s.people.find(p=>p.id===id)?.name||x.authorNames?.[id]||'Ancien voisin';
+export function compositionCreditHTML(s,x){
+ const ids=x.authors||[x.author];return `<div class="composition-credit"><strong>Composition :</strong> ${ids.map(id=>{const p=s.people.find(p=>p.id===id),name=authorName(s,x,id);return p?personCard(p):`<span>${esc(name)}</span>`;}).join(' ')}</div>`;
+}
+const archived=(s,x)=>s.songArchive.some(r=>r.id===x.id);
+export const DEFAULT_FILTERS={query:'',author:'',group:'',status:'active',type:'all',min:0,max:100,sort:'quality-desc',genre:'',ownership:''};
+export function catalogueEntries(s,f=DEFAULT_FILTERS){
+ const entries=[...s.projects.filter(x=>x.status!=='finished').map(x=>({...x,kind:'project'})),...s.songs.map(x=>({...x,kind:'song'}))];
+ const query=f.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const filtered=entries.filter(x=>{
+  const authors=x.authors||[x.author],isArchive=x.kind==='song'&&archived(s,x),weak=!!x.weak,abandoned=x.status==='abandoned';
+  if(f.genre&&x.genre!==f.genre)return false;
+  if(f.ownership==='personal'&&(x.kind==='song'?x.ownerGroupId:x.groupId))return false;if(f.ownership==='group'&&!(x.kind==='song'?x.ownerGroupId:x.groupId))return false;
+  if(f.type!=='all'&&f.type!==x.kind)return false;
+  if(f.status==='active'&&(isArchive||weak||abandoned))return false;
+  if(f.status==='weak'&&!weak)return false;if(f.status==='archived'&&!isArchive)return false;if(f.status==='abandoned'&&!abandoned)return false;
+  if(f.author&&!authors.includes(f.author))return false;
+  if(f.group&&(x.kind==='song'?x.ownerGroupId:x.groupId)!==f.group)return false;
+  if(x.kind==='song'&&(x.quality<f.min||x.quality>f.max))return false;
+  const text=[x.title,...authors.map(id=>authorName(s,x,id)),s.groups.find(g=>g.id===(x.kind==='song'?x.ownerGroupId:x.groupId))?.name||''].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  return text.includes(query);
+ });
+ const value=x=>f.sort.startsWith('quality')?x.kind==='song'?x.quality:null:f.sort==='mastery'?masteryValue(s,x,f):f.sort==='progress'?x.kind==='project'?x.work/x.target:1:x.updated??x.time;
+ return filtered.sort((a,b)=>{const av=value(a),bv=value(b);if(av===null)return bv===null?String(a.id).localeCompare(String(b.id)):1;if(bv===null)return -1;return (f.sort==='quality-asc'?av-bv:bv-av)||String(a.id).localeCompare(String(b.id));});
+}
+export function masteryValue(s,x,f){if(x.kind!=='song')return null;if(f.group)return s.groups.find(g=>g.id===f.group)?.repertoire.find(r=>r.songId===x.id)?.mastery??null;if(f.author)return s.people.find(p=>p.id===f.author)?.songMastery[x.id]??0;return null;}
+export function catalogueControls(s){
+ const authors=new Map(s.people.map(p=>[p.id,p.name]));
+ for(const x of [...s.projects,...s.songs])for(const id of x.authors||[x.author])if(!authors.has(id))authors.set(id,authorName(s,x,id));
+ return `<div class="catalogue-controls"><label>Rechercher<input data-catalogue-filter="query" type="search" placeholder="Titre, auteur ou groupe"></label><label>Auteur<select data-catalogue-filter="author"><option value="">Tous les auteurs</option>${[...authors].map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Groupe<select data-catalogue-filter="group"><option value="">Tous les groupes</option>${s.groups.map(g=>`<option value="${g.id}">${esc(g.name)} · ${esc(g.genre)}</option>`).join('')}</select></label><label>Rattachement<select data-catalogue-filter="ownership"><option value="">Tous</option><option value="personal">Personnel</option><option value="group">Groupe</option></select></label><label>Genre<select data-catalogue-filter="genre"><option value="">Tous les genres</option>${[...new Set([...s.songs,...s.projects].map(x=>x.genre))].map(g=>`<option>${esc(g)}</option>`).join('')}</select></label><label>État<select data-catalogue-filter="status"><option value="active">Actifs</option><option value="all">Tous</option><option value="weak">Morceaux faibles</option><option value="archived">Archives manuelles</option><option value="abandoned">Projets abandonnés</option></select></label><label>Type<select data-catalogue-filter="type"><option value="all">Projets et chansons</option><option value="project">Projets</option><option value="song">Chansons</option></select></label><label>Trier<select data-catalogue-filter="sort"><option value="quality-desc">Qualité décroissante</option><option value="quality-asc">Qualité croissante</option><option value="date">Date récente</option><option value="progress">Avancement</option></select></label><label>Qualité des chansons · minimum<input data-catalogue-filter="min" type="number" min="0" max="100" value="0"></label><label>Maximum<input data-catalogue-filter="max" type="number" min="0" max="100" value="100"></label><button data-catalogue-reset>Réinitialiser</button></div><p class="muted">Bancale : 0–24 · Modeste : 25–49 · Accrocheuse : 50–79 · Hit : 80–100. Ces catégories décrivent la qualité, sans bonus BandLive. La qualité et la durée sont fixées à la composition. Pratiquer entraîne les musiciens. Une recomposition peut faire évoluer le morceau.</p>`;}
+export function songDetailsHTML(s,x){
+ const authors=x.authors||[x.author],project=x.kind==='project'||('work' in x),group=s.groups.find(g=>g.id===(project?x.groupId:x.ownerGroupId));
+ const resume=project&&x.status!=='abandoned'?authors.find(id=>id===s.playerId&&s.people.some(p=>p.id===id))||authors.find(id=>s.people.some(p=>p.id===id)):null;
+ const rewriter=project?null:s.people.find(p=>p.id===s.playerId&&(authors.includes(p.id)||group?.members.includes(p.id)))||s.people.find(p=>authors.includes(p.id));
+ return `<h2>${project?'Projet':'Chanson'} · « ${esc(x.title)} »</h2>${compositionCreditHTML(s,x)}<p>${project?'Rattachement du projet':'Propriétaire'} : ${group?groupLinkHTML(group):'Œuvre personnelle'} · ${esc(x.genre)}</p><p>${project?`Avancement ${Math.round(x.work/x.target*100)} % · potentiel provisoire ${x.potential}/100 · ${x.sessions} séances · ${x.minutes||0} minutes travaillées · ${esc(x.status)}`:`${songQualityHTML(x)} · Qualité ${x.quality}/100 · ${x.weak?'Morceau faible':archived(s,x)?'Archivé':'Actif'}${x.qualityReference!==null&&x.qualityReference!==undefined?` · référence personnelle ${Math.round(x.qualityReference)}/100`:''}`}</p>${project?'':`<p>Durée : ${songTurns(x)} tours · fixée à la composition. La pratique entraîne les musiciens.</p>${rewriter?`<button data-recompose="${x.id}" data-actor="${rewriter.id}">Recomposer avec ${esc(rewriter.name)}</button>`:''}${x.revisions?.length?`<p>${x.revisions.length} recomposition(s) terminée(s).</p>`:''}`}<p>${esc(x.tone)} · intensité ${x.intensity}/100 · ${stamp(x.updated??x.time)}</p>${x.sources?.length?`<details><summary>Sources et expériences</summary>${x.sources.map(c=>`<p>${esc(c.text)}</p>`).join('')}</details>`:''}${x.breakdown?`<details><summary>Calcul de qualité</summary><p>Compétences ${x.breakdown.craft} · expression ${x.breakdown.expression} · ensemble ${x.breakdown.ensemble} · affinités ${x.breakdown.affinity||0} · traits ${x.breakdown.perfection} · variation ${x.breakdown.variance} · surcharge −${x.breakdown.overwhelm}.</p></details>`:''}${resume?`<button data-resume-project="${x.id}:${resume}">Reprendre ce projet avec ${esc(authorName(s,x,resume))}</button>`:''}${project?`<p>Contributions : ${Object.entries(x.contributions||{}).map(([id,n])=>`${esc(authorName(s,x,id))} ${n} min`).join(', ')||'Pas de temps individuel enregistré avant la migration.'}</p>`:`<button data-archive-song="${x.id}" data-restore-song="${archived(s,x)||x.weak?'yes':'no'}">${archived(s,x)||x.weak?'Restaurer':'Archiver'}</button>`}`;
+}
+export function catalogueHTML(s,filters,limit=50){
+ const entries=catalogueEntries(s,filters);
+ return {count:entries.length,html:entries.slice(0,limit).map(x=>{const project=x.kind==='project',authors=x.authors||[x.author],group=s.groups.find(g=>g.id===(project?x.groupId:x.ownerGroupId)),mastery=masteryValue(s,x,filters);return `<article class="catalogue-row" data-key="catalogue-${x.kind}-${x.id}"><div><small>${project?'PROJET':'CHANSON'}${x.weak?' · FAIBLE':''}${archived(s,x)?' · ARCHIVÉ':''}${x.status==='abandoned'?' · ABANDONNÉ':''}</small><button class="text-button" data-song-details="${x.kind}:${x.id}">« ${esc(x.title)} »</button>${compositionCreditHTML(s,x)}<p>Propriétaire : ${group?groupLinkHTML(group):'Personnel'}</p></div><div><b>${project?`${Math.round(x.work/x.target*100)} %`:`${x.quality}/100`}</b><small>${project?'Avancement':songQualityHTML(x)}${project?'':` · ${songTurns(x)} tours`}</small></div></article>`;}).join('')+(entries.length>limit?'<button id="more-songs">Voir davantage</button>':'')||( '<p>Aucune composition dans ces filtres.</p>')};
+}
+
