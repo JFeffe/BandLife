@@ -1,6 +1,6 @@
 # BandLife — La Maison des Accords
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 34** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 35** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -27,7 +27,7 @@ npm test
 npm run build:bandlive
 ```
 
-`npm test` exécute les 32 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
+`npm test` exécute les 34 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
 
 ## Contenu et mises à jour
 
@@ -39,6 +39,12 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 35 — préparer le prochain concert
+
+Le panneau **Parcours** compare maintenant le répertoire prêt au minimum nécessaire : chansons terminées, adoptées et préparées à 100 %, et diversité de styles lorsque le contrat l’exige. Il indique les chansons à avancer en priorité, leur prochaine étape et les invitations déjà en attente; un clic ouvre leur fiche habituelle. Les exigences à accomplir sur scène restent distinctes : conquérir le public et, selon le contrat, jouer plusieurs chansons différentes. Les goûts annoncés du public sont des conseils, pas des conditions supplémentaires. Le jour du show, le panneau affiche le répertoire réellement emporté après le départ.
+
+Validation : 34 suites de régression. Une partie automatisée chronologique, avec les décisions et le moteur du jeu, atteint la finale locale sans injecter de chansons prêtes ni forcer les votes ou les résultats : S8, 2 chansons prêtes; S16 et S17, 5 chansons prêtes; trois concerts gagnés par le simulateur BandLive. Le scénario inclut les nuits, le rechargement d’une sauvegarde et les récompenses au retour. Il couvre une trajectoire déterministe, sans conclure à l’équilibrage général de la campagne. Vérification complémentaire dans le navigateur : création d’un trio, choix de destination, composition, reprise de sauvegarde, panneau Parcours et ouverture des fiches de chansons. Les concerts de cette partie automatisée ne sont pas joués manuellement à l’écran.
 
 ## Historique technique — prototype 34
 

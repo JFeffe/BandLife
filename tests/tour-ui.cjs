@@ -1,6 +1,7 @@
 // Functional DOM adapter: production UI handlers and routes, not browser layout QA.
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 const S=require('../dist/sim.js'),M=require('../dist/music.js'),D=require('../dist/decisions.js'),I=require('../dist/identity.js'),H=require('../dist/house.js'),W=require('../dist/weeks.js'),T=require('../dist/shows.js'),R=require('../dist/morale.js');
+require('../dist/show-preparation.js');
 const els=new Map();
 class Element{
  constructor(id){this.id=id;this.open=false;this.hidden=false;this.handlers={};this.style={setProperty(){}};this.dataset={};this.attributes={};this._html='';this.children=new Map();this.scrollTop=0;this.classes=new Set();this.classList={add:x=>this.classes.add(x),remove:x=>this.classes.delete(x),toggle:(x,v)=>v?this.classes.add(x):this.classes.delete(x)};}
@@ -13,7 +14,7 @@ class Element{
 for(const id of ['dialog','dialogContent','closeDialog','songbook','musiciansPanel','schedulePanel','showVan','tourBanner','jam','coffee','newComposition','invite','map','weekPanel','characters'])els.set(id,new Element(id));
 const tabs=['repertoire','musicians','schedule'].map(id=>{const el=new Element(id);el.dataset.railTab=id;return el;}),panels=['songbook','musiciansPanel','schedulePanel'].map((id,i)=>{const el=els.get(id);el.dataset.railPanel=tabs[i].dataset.railTab;return el;});
 const $=sel=>els.get(sel.slice(1));
-const ctx={S,M,D,I,H,W,T,R,MaisonShows:T,state:S.create(6),$,window:{matchMedia:()=>({matches:false})},document:{hidden:false,querySelectorAll:sel=>sel==='[data-rail-tab]'?tabs:sel==='[data-rail-panel]'?panels:[]},positions:{},running:false,dialogWasRunning:false,dialogOnClose:null,save:()=>{},toast:()=>{},activity:()=> 'Pratique',actionIcon:{practice:'♫',rest:'☾',compose:'✎',talk:'☕'},avatar:I.portrait,showPerson:id=>ctx.openedPerson=id,setRunning:v=>ctx.running=v&&!W.blocked(ctx.state)};
+const ctx={S,M,D,I,H,W,T,R,MaisonShows:T,MaisonShowPreparation:globalThis.MaisonShowPreparation,state:S.create(6),$,window:{matchMedia:()=>({matches:false})},document:{hidden:false,querySelectorAll:sel=>sel==='[data-rail-tab]'?tabs:sel==='[data-rail-panel]'?panels:[]},positions:{},running:false,dialogWasRunning:false,dialogOnClose:null,save:()=>{},toast:()=>{},activity:()=> 'Pratique',actionIcon:{practice:'♫',rest:'☾',compose:'✎',talk:'☕'},avatar:I.portrait,showPerson:id=>ctx.openedPerson=id,setRunning:v=>ctx.running=v&&!W.blocked(ctx.state)};
 ctx.render=()=>{ctx.window.MaisonRailUI?.render();ctx.window.MaisonTourUI?.render();ctx.window.MaisonWeeksUI?.render();};vm.createContext(ctx);
 const app=fs.readFileSync('dist/app.js','utf8');vm.runInContext(app.split('\n').find(l=>l.startsWith('function openDialog(')),ctx);vm.runInContext(app.split('\n').find(l=>l.startsWith('function closeDialog(')),ctx);vm.runInContext(app.split('\n').find(l=>l.startsWith("$('#closeDialog').onclick")),ctx);
 function run(file){vm.runInContext(fs.readFileSync('dist/'+file,'utf8'),ctx);}
@@ -66,3 +67,17 @@ buttons=$('#songCards').querySelectorAll('[data-details]');assert.equal(buttons.
 assert(!$('#songCards').innerHTML.includes('data-list-page'));
 buttons[6].onclick();assert($('#dialog').open);assert($('#dialogContent').innerHTML.includes(M.song(ctx.state,buttons[6].dataset.details).title));$('#dialog').close();
 console.log('PASS scrollable right panels: all six musicians and seven songs present, scroll position preserved, detail actions functional.');
+
+// The preparation panel opens the existing song sheet without submitting an order.
+const J=require('../dist/journey.js');ctx.MaisonJourney=J;ctx.state=S.create();J.choose(ctx.state,'radio');
+const pendingOrders=JSON.stringify(ctx.state.music.orders);tabs[2].onclick();
+assert.match(panels[2].innerHTML,/À préparer/);assert.match(panels[2].innerHTML,/Chansons prêtes : 0 \/ 1/);
+const target=panels[2].querySelectorAll('[data-prep-song]')[0];assert(target);target.onclick();
+assert($('#dialog').open);assert($('#dialogContent').innerHTML.includes(M.song(ctx.state,target.dataset.prepSong).title));
+assert.equal(JSON.stringify(ctx.state.music.orders),pendingOrders);$('#dialog').close();
+const scroll=panels[2].querySelector('.rail-scroll');scroll.scrollTop=120;ctx.window.MaisonRailUI.render();
+assert.equal(panels[2].querySelector('.rail-scroll').scrollTop,120);
+const newSong=M.newSong(ctx.state,['lea'],'Jazz',()=>.5,{progress:100});Object.assign(newSong,{adopted:true,preparation:100});
+ctx.window.MaisonRailUI.render();assert.match(panels[2].innerHTML,/Minimum prêt/);assert(!panels[2].innerHTML.includes('data-prep-song'));
+panels[2].querySelectorAll('[data-prep-repertoire]')[0].onclick();assert.equal(tabs[0].attributes['aria-selected'],'true');assert(tabs[0].focused);
+console.log('PASS preparation links, no automatic orders, live readiness, retained scroll and keyboard focus when returning to repertoire.');
