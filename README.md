@@ -1,6 +1,6 @@
 # BandLife — La Maison des Accords
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 36** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 37** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -39,6 +39,12 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 37 — les dates dans la barre de la maison
+
+La barre de la maison affiche la scène actuelle, le compte à rebours du concert et les trois dates clés de l’acte, avec l’étape en cours mise en évidence. Le bouton « Parcours » a été retiré : le nom de la scène ouvre les destinations, récompenses et rencontres. Les trois mois de calendrier et les étapes en colonne quittent l’onglet de droite, qui conserve la préparation du concert et l’historique.
+
+La barre reste sur deux lignes : 63 px de haut pour une largeur de 1 007 px, et 69 px dans la disposition étroite testée, sans débordement. Les dates suivent les changements d’acte et les nouvelles tentatives de finale. Validation : 37 suites, navigation réelle depuis la barre, reprise d’une sauvegarde et vérification visuelle aux deux largeurs; aucune erreur console.
 
 ## Prototype 36 — progression et vie du groupe
 

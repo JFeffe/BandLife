@@ -1,6 +1,6 @@
 {
   "name": "bandlife",
-  "version": "0.36.0",
+  "version": "0.37.0",
   "private": true,
   "description": "BandLife — La Maison des Accords, simulation musicale et concerts BandLive",
   "engines": { "node": ">=22" },

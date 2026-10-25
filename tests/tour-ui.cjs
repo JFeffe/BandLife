@@ -11,7 +11,7 @@ class Element{
  querySelector(selector){if(selector==='.rail-scroll'){if(!this.children.has(selector))this.children.set(selector,new Element(selector));return this.children.get(selector);}return null;}
  setAttribute(k,v){this.attributes[k]=v;}focus(){this.focused=true;}addEventListener(k,v){this.handlers[k]=v;}showModal(){this.open=true;}close(){this.open=false;this.handlers.close?.();}
 }
-for(const id of ['dialog','dialogContent','closeDialog','songbook','musiciansPanel','schedulePanel','showVan','tourBanner','jam','coffee','newComposition','invite','map','weekPanel','characters'])els.set(id,new Element(id));
+for(const id of ['dialog','dialogContent','closeDialog','songbook','musiciansPanel','schedulePanel','showVan','tourBanner','jam','coffee','newComposition','map','weekPanel','characters'])els.set(id,new Element(id));
 const tabs=['repertoire','musicians','schedule'].map(id=>{const el=new Element(id);el.dataset.railTab=id;return el;}),panels=['songbook','musiciansPanel','schedulePanel'].map((id,i)=>{const el=els.get(id);el.dataset.railPanel=tabs[i].dataset.railTab;return el;});
 const $=sel=>els.get(sel.slice(1));
 const ctx={S,M,D,I,H,W,T,R,MaisonShows:T,MaisonShowPreparation:globalThis.MaisonShowPreparation,state:S.create(6),$,window:{matchMedia:()=>({matches:false})},document:{hidden:false,querySelectorAll:sel=>sel==='[data-rail-tab]'?tabs:sel==='[data-rail-panel]'?panels:[]},positions:{},running:false,dialogWasRunning:false,dialogOnClose:null,save:()=>{},toast:()=>{},activity:()=> 'Pratique',actionIcon:{practice:'♫',rest:'☾',compose:'✎',talk:'☕'},avatar:I.portrait,showPerson:id=>ctx.openedPerson=id,setRunning:v=>ctx.running=v&&!W.blocked(ctx.state)};
@@ -21,11 +21,11 @@ function run(file){vm.runInContext(fs.readFileSync('dist/'+file,'utf8'),ctx);}
 function place(){ctx.positions={};for(const p of ctx.state.people){const [x,y]=H.position(ctx.state,p);ctx.positions[p.id]={x,y,room:p.room,queue:[],el:new Element(p.id)};}}
 place();run('rail-ui.js');run('tour-ui.js');run('weeks-ui.js');
 assert.equal(tabs[0].attributes['aria-selected'],'true');assert.equal(panels[0].hidden,false);assert(panels[1].hidden&&panels[2].hidden);
-tabs[2].onclick();assert(!panels[2].hidden);assert(panels[0].hidden&&panels[1].hidden);assert.match(panels[2].innerHTML,/Semaine 1/);for(const m of [1,2,3])assert(panels[2].innerHTML.includes('<h3>Mois '+m+'</h3>'));assert.match(panels[2].innerHTML,/S12/);assert.match(panels[2].innerHTML,/PROCHAIN SPECTACLE/);assert.match(panels[2].innerHTML,/jour\(s\) simulé/);const calendarBefore=panels[2].innerHTML;ctx.window.MaisonRailUI.render();assert.equal(panels[2].innerHTML,calendarBefore);assert(!panels[2].innerHTML.includes('<h3>Mois 4</h3>'));
+tabs[2].onclick();assert(!panels[2].hidden);assert(panels[0].hidden&&panels[1].hidden);assert.match(panels[2].innerHTML,/Semaine 1/);assert(!panels[2].innerHTML.includes('mini-month'));assert(!panels[2].innerHTML.includes('schedule-steps')); assert.match(panels[2].innerHTML,/PROCHAIN SPECTACLE/);assert.match(panels[2].innerHTML,/jour\(s\) simulé/);const calendarBefore=panels[2].innerHTML;ctx.window.MaisonRailUI.render();assert.equal(panels[2].innerHTML,calendarBefore);assert(!panels[2].innerHTML.includes('<h3>Mois 4</h3>'));
 tabs[2].onkeydown({key:'ArrowLeft',preventDefault(){}});assert.equal(tabs[1].attributes['aria-selected'],'true');assert(tabs[1].focused);const people=panels[1].querySelectorAll('[data-open-person]');assert.equal(people.length,6);people[1].onclick();assert.equal(ctx.openedPerson,'max');
-console.log('PASS onglets exclusifs, navigation clavier, semaine actuelle + deux mois suivants et ouverture des fiches.');
+console.log('PASS onglets exclusifs, navigation clavier, préparation sans calendrier dupliqué et ouverture des fiches.');
 
-ctx.state.tick=7*144;ctx.state.calendar.nextAt=7*1440+600;T.ensureDue(ctx.state);place();ctx.running=true;tabs[2].onclick();ctx.render();assert.match(panels[2].innerHTML,/Voir le show/);assert(!$('#dialog').open);assert.equal(ctx.state.tour.active.phase,'preparing');assert(ctx.running);assert(!$('#invite').disabled);
+ctx.state.tick=7*144;ctx.state.calendar.nextAt=7*1440+600;T.ensureDue(ctx.state);place();ctx.running=true;tabs[2].onclick();ctx.render();assert.match(panels[2].innerHTML,/Voir le show/);assert(!$('#dialog').open);assert.equal(ctx.state.tour.active.phase,'preparing');assert(ctx.running);
 for(let i=0;i<6;i++){S.step(ctx.state,()=>.4);ctx.render();}assert.equal(ctx.state.tour.active.phase,'coffee');assert(ctx.state.people.every(p=>p.room==='kitchen'));assert.match($('#tourBanner').innerHTML,/café ensemble/);assert(ctx.running);
 for(let i=0;i<6;i++){S.step(ctx.state,()=>.4);ctx.render();}assert.equal(ctx.state.tour.active.phase,'packing');assert(!$('#dialog').open);assert(!ctx.state.calendar.pending);assert.match($('#tourBanner').innerHTML,/prépare les instruments/);
 for(let i=0;i<6;i++){S.step(ctx.state,()=>.4);ctx.render();}assert.equal(ctx.state.tour.active.phase,'departing');assert(!ctx.running);assert(!$('#tourBanner').hidden);assert(!$('#showVan').hidden);assert(ctx.positions.lea.queue.some(([x,y])=>x===H.GARAGE_EXIT[0]&&y===H.GARAGE_EXIT[1]));
@@ -81,3 +81,22 @@ const newSong=M.newSong(ctx.state,['lea'],'Jazz',()=>.5,{progress:100});Object.a
 ctx.window.MaisonRailUI.render();assert.match(panels[2].innerHTML,/Minimum prêt/);assert(!panels[2].innerHTML.includes('data-prep-song'));
 panels[2].querySelectorAll('[data-prep-repertoire]')[0].onclick();assert.equal(tabs[0].attributes['aria-selected'],'true');assert(tabs[0].focused);
 console.log('PASS preparation links, no automatic orders, live readiness, retained scroll and keyboard focus when returning to repertoire.');
+
+// Campaign dates remain available in the house toolbar with other rail tabs open.
+els.set('journeyTimeline',new Element('journeyTimeline'));ctx.homeOpen=true;ctx.window.homeOpen=true;
+run('journey-ui.js');const journeyUI=ctx.window.MaisonJourneyUI;
+ctx.state=S.create();J.choose(ctx.state,'radio');journeyUI.render();
+const timeline=$('#journeyTimeline');assert.match(timeline.innerHTML,/Concert dans 7 sem/);
+for(const date of [8,16,17])assert(timeline.innerHTML.includes('<b>S'+date+'</b>'));
+assert.match(timeline.innerHTML,/aria-current="step"/);const overview=$('#journeyOverview');
+journeyUI.render();assert.equal($('#journeyOverview'),overview,'Do not rebuild the focused toolbar link each tick');
+ctx.state.tick=3*144;journeyUI.render();assert.match(timeline.innerHTML,/Concert dans 4 sem/);
+$('#journeyOverview').onclick();assert($('#dialog').open);assert.match($('#dialogContent').innerHTML,/Le club des découvertes/);$('#dialog').close();
+Object.assign(ctx.state.journey,{stage:2,nextWeek:18,selected:null});journeyUI.render();assert.match(timeline.innerHTML,/<b>S18<\/b>/);
+ctx.state.journey.history.push({act:0,stage:1,week:16,success:false});journeyUI.render();assert.match(timeline.innerHTML,/class="failed"/);
+Object.assign(ctx.state.journey,{act:1,stage:0,firstWeek:25,nextWeek:25,actStarts:[8,25]});journeyUI.render();assert.match(timeline.innerHTML,/Scène nationale/);assert.match(timeline.innerHTML,/<b>S34<\/b>/);
+ctx.state.tour.active={phase:'stage',week:25};journeyUI.render();assert.match(timeline.innerHTML,/Concert · S25/);
+ctx.state.journey.status='won';journeyUI.render();assert.match(timeline.innerHTML,/Victoire mondiale/);assert(!timeline.innerHTML.includes('aria-current="step"'));
+ctx.state.journey.status='lost';journeyUI.render();assert.match(timeline.innerHTML,/Tournée terminée/);
+assert(!fs.readFileSync('dist/index.html','utf8').includes('id="invite"'));
+console.log('PASS compact live toolbar dates, countdown, retries, act transitions, terminal states and destination access without the old Parcours button.');
