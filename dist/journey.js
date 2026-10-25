@@ -5,23 +5,23 @@ const show=(id,name,icon,styles,fans,resistance,reward,extra={})=>({id,name,icon
 const acts=[
  {name:'Scène locale',short:'Locale',title:'Sortir du garage',stages:[
   [show('discovery','Le club des découvertes','✦',['Indie','Pop'],4,45,'meeting'),show('radio','La session radio','◉',['Jazz','Folk'],4,50,'card')],
-  [show('authors','La soirée des auteurs','✎',['Indie','Folk'],6,50,'composition',{minSongs:2}),show('electric','Les nuits électriques','ϟ',['Punk','Métal'],6,55,'card')],
+  [show('authors','La soirée des auteurs','✎',['Indie','Folk'],6,50,'composition',{minReady:2}),show('electric','Les nuits électriques','ϟ',['Punk','Métal'],6,55,'card')],
   [show('headliner','La première partie décisive','★',['Pop','Jazz','Indie'],8,65,'arc')]
  ]},
  {name:'Scène nationale',short:'Nationale',title:'Prendre la route',stages:[
-  [show('campus','La tournée des campus','✦',['Indie','Ska'],6,65,'meeting'),show('national-radio','Les sessions nationales','◉',['Pop','Folk'],6,70,'exchange')],
-  [show('songwriters','Les rencontres de la chanson','✎',['Folk','Jazz'],7,70,'composition',{minReady:3}),show('national-nights','Le circuit électrique','ϟ',['Métal','Électro'],7,75,'card')],
-  [show('national-final','La grande scène nationale','★',['Pop','Indie','Ska'],8,80,'arc',{minReady:3})]
+  [show('campus','La tournée des campus','✦',['Indie','Ska'],6,80,'meeting'),show('national-radio','Les sessions nationales','◉',['Pop','Folk'],6,85,'exchange')],
+  [show('songwriters','Les rencontres de la chanson','✎',['Folk','Jazz'],7,95,'composition',{minReady:3}),show('national-nights','Le circuit électrique','ϟ',['Métal','Électro'],7,100,'card')],
+  [show('national-final','La grande scène nationale','★',['Pop','Indie','Ska'],8,115,'arc',{minReady:3})]
  ]},
  {name:'Scène internationale',short:'Internationale',title:'Au-delà des frontières',stages:[
-  [show('crossroads','Le festival des croisements','✦',['Ska','Jazz','Électro'],7,80,'meeting'),show('live-session','La session à l’étranger','◉',['Folk','Pop'],7,85,'exchange')],
-  [show('artist-residency','Les nuits d’auteurs','✎',['Indie','Folk','Jazz'],8,85,'composition',{minReady:3,readyStyles:2}),show('continental','Le circuit des capitales','ϟ',['Punk','Métal','Électro'],8,90,'card')],
-  [show('international-final','La tête d’affiche internationale','★',['Jazz','Pop','Électro'],8,95,'arc',{minReady:3,readyStyles:2})]
+  [show('crossroads','Le festival des croisements','✦',['Ska','Jazz','Électro'],7,120,'meeting'),show('live-session','La session à l’étranger','◉',['Folk','Pop'],7,125,'exchange')],
+  [show('artist-residency','Les nuits d’auteurs','✎',['Indie','Folk','Jazz'],8,135,'composition',{minReady:3,readyStyles:2}),show('continental','Le circuit des capitales','ϟ',['Punk','Métal','Électro'],8,140,'card')],
+  [show('international-final','La tête d’affiche internationale','★',['Jazz','Pop','Électro'],8,155,'arc',{minReady:3,readyStyles:2})]
  ]},
  {name:'Scène mondiale',short:'Mondiale',title:'Faire le tour du monde',stages:[
-  [show('world-collab','Les rencontres sans frontières','✦',['Ska','Folk','Jazz'],8,95,'meeting'),show('world-broadcast','La session mondiale','◉',['Pop','Indie'],8,100,'exchange')],
-  [show('world-authors','Le grand rendez-vous des auteurs','✎',['Jazz','Folk','Indie'],8,100,'composition',{minReady:4,readyStyles:2}),show('world-electric','La nuit des grandes scènes','ϟ',['Électro','Métal','Punk'],8,105,'card')],
-  [show('world-final','Le concert des horizons','★',['Pop','Jazz','Électro'],8,110,'victory',{minReady:4,readyStyles:2})]
+  [show('world-collab','Les rencontres sans frontières','✦',['Ska','Folk','Jazz'],8,165,'meeting'),show('world-broadcast','La session mondiale','◉',['Pop','Indie'],8,170,'exchange')],
+  [show('world-authors','Le grand rendez-vous des auteurs','✎',['Jazz','Folk','Indie'],8,180,'composition',{minReady:4,readyStyles:2}),show('world-electric','La nuit des grandes scènes','ϟ',['Électro','Métal','Punk'],8,185,'card')],
+  [show('world-final','Le concert des horizons','★',['Pop','Jazz','Électro'],8,200,'victory',{minReady:4,readyStyles:2})]
  ]}
 ];
 const stages=acts[0].stages;
@@ -38,7 +38,7 @@ function init(s){
 }
 function currentAct(s){return acts[s.journey?.act||0];}
 function stageWeek(s,index,actIndex=s.journey?.act||0){const j=init(s);if(actIndex===j.act&&index===j.stage)return j.nextWeek;const record=j.history.findLast(h=>(h.act||0)===actIndex&&h.stage===index);if(record)return record.week;const first=j.actStarts[actIndex]??j.firstWeek+(actIndex-j.act)*17;return first+(index===2?9:index*8);}
-function options(s,index=s.journey?.stage||0,actIndex=s.journey?.act||0){const j=init(s);return (acts[actIndex]?.stages[index]||[]).map(o=>({...o,act:actIndex,reward:o.reward==='meeting'&&(s.people.length>=6||!j.candidate)?'card':o.reward,candidate:o.reward==='meeting'&&s.people.length<6&&actIndex===j.act?j.candidate:null}));}
+function options(s,index=s.journey?.stage||0,actIndex=s.journey?.act||0){const j=init(s);return (acts[actIndex]?.stages[index]||[]).map(o=>actIndex===j.act&&index===j.stage&&j.selected?.id===o.id?JSON.parse(JSON.stringify(j.selected)):({...o,act:actIndex,reward:o.reward==='meeting'&&(s.people.length>=6||!j.candidate)?'card':o.reward,candidate:o.reward==='meeting'&&s.people.length<6&&actIndex===j.act?j.candidate:null}));}
 function rewardText(o){if(o.reward==='meeting')return `Rencontre avec ${o.candidate?.name||'un musicien'} · ${o.candidate?.instrument||'instrument à découvrir'} · essai d’une semaine.`;if(o.reward==='card')return 'Ajouter 1 carte spéciale parmi 3, au musicien de votre choix.';if(o.reward==='exchange')return 'Masterclasse : remplacer 1 carte par une des 3 spéciales de son instrument, sans agrandir le paquet.';if(o.reward==='composition')return 'Résidence d’écriture : la prochaine nouvelle composition gagne +1 niveau (maximum 7).';if(o.reward==='victory')return 'Reconnaissance mondiale : victoire de la partie.';return `Accès à la ${acts[Math.min(3,(o.act||0)+1)].name.toLowerCase()} et +1 chance (maximum 3).`;}
 function outstanding(s){const j=s.journey;return j.pendingReward||j.pendingArc||['offered','decision'].includes(j.encounter?.phase);}
 function choose(s,id){const j=init(s);if(j.status!=='active'||s.tick<j.routeReadyAt||j.selected||root.MaisonShows.busy(s)||outstanding(s))return false;const o=options(s).find(o=>o.id===id);if(!o)return false;j.selected=JSON.parse(JSON.stringify(o));j.selected.week=j.nextWeek;j.selected.rewardDescription=rewardText(o);S().log(s,'La prochaine destination',`${o.name} · semaine ${j.nextWeek}. Réussite : ${rewardText(o)}`,'event');return true;}

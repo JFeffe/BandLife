@@ -12,7 +12,9 @@ x.preparation=100;x.progress=99;assert(!P.project(s).complete,'Both writing and 
 x.progress=100;x.archived=true;assert(!P.project(s).complete);assert(!P.project(s).candidates.some(c=>c.id===x.id));x.archived=false;
 Object.assign(s.journey,{stage:1,selected:null,nextWeek:16});assert(J.choose(s,'authors'));
 assert.equal(P.project(s).minimum,2);assert(!P.project(s).complete);ready('Folk');
-assert(P.project(s).complete);assert.match(P.project(s).onStage.join(' '),/Jouer au moins 2/);
+assert(P.project(s).complete);assert.equal(s.journey.selected.minReady,2);
+// Selected legacy contracts keep their original terms.
+s.journey.selected.minSongs=2;assert.match(P.project(s).onStage.join(' '),/Jouer au moins 2/);
 // Preparation alone cannot satisfy the on-stage two-song condition.
 assert(J.requirements(s,{week:16,songs:T.setlist(s),result:{songs:[x]}}).some(t=>t.includes('Jouer 2')));
 Object.assign(s.journey,{act:2,stage:2,selected:null,nextWeek:51});assert(J.choose(s,'international-final'));

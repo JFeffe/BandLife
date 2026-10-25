@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const S=require('../dist/sim.js'),M=require('../dist/music.js'),D=require('../dist/decisions.js');
 require('../dist/house.js');const W=require('../dist/weeks.js');require('../dist/bandlive.js');
 const T=require('../dist/shows.js');require('../dist/morale.js');require('../dist/activities.js');
-require('../dist/goals.js');const J=require('../dist/journey.js');require('../dist/living.js');
+require('../dist/goals.js');const J=require('../dist/journey.js');require('../dist/living.js');require('../dist/house-events.js');
 let seed=35;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
 const originalRandom=Math.random;Math.random=random;
 let s=S.create(),steps=0;const report=[],attempted=new Map();

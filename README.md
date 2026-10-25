@@ -1,6 +1,6 @@
 # BandLife — La Maison des Accords
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 35** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 36** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -27,7 +27,7 @@ npm test
 npm run build:bandlive
 ```
 
-`npm test` exécute les 34 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
+`npm test` exécute les 37 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `npm run test:campaign` produit le détail JSON de neuf campagnes chronologiques reproductibles. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
 
 ## Contenu et mises à jour
 
@@ -39,6 +39,16 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 36 — progression et vie du groupe
+
+Les publics deviennent plus résistants après l’acte local : 80–115 au national, 120–155 à l’international, puis 165–200 au mondial. La soirée des auteurs demande désormais deux chansons prêtes au départ : conquérir le public dès le premier morceau ne fait plus perdre le contrat. Les destinations déjà acceptées et les concerts sauvegardés gardent leurs conditions. Les récompenses et le module de concert original sont conservés.
+
+Un panneau **Vie du groupe** propose trois types de moments facultatifs selon les personnalités et les liens réels : une tension entre musiciens, une idée partagée sur une composition, ou un besoin de calme. Chaque réponse annonce ses effets sur le moral, la relation ou l’écriture. L’idée partagée apporte jusqu’à 8 points lors du prochain travail de l’auteur sur cette chanson, avant l’expiration annoncée. Au maximum un événement toutes les trois semaines, à partir de S2; aucun malus si on le laisse passer, aucune fenêtre ni pause automatique. Les souvenirs et les choix en attente persistent dans la sauvegarde. Ces moments n’ajoutent pas d’occasions d’activité ni de cartes.
+
+Validation : 37 suites, dont neuf campagnes complètes (trois graines × trois parcours privilégiant cartes, écriture ou rencontres), exécutées par un joueur automatisé avec les décisions et le moteur réels. Ces neuf groupes préparés gagnent les douze concerts. Les concerts mondiaux prennent en moyenne 6,81 tours contre 4,22 avant ajustement; 18 sur 27 utilisent deux morceaux, contre 2 auparavant. Le contrôle qui conserve les capacités de chansons débutantes après l’acte local perd, tandis que le groupe qui progresse gagne. Ce petit échantillon déterministe mesure la progression de ces stratégies, pas le taux de victoire des joueurs. Les tests couvrent aussi les événements dans une campagne complète, leurs sauvegardes, délais et effets appliqués une seule fois.
+
+Vérification dans le navigateur : progression jusqu’à S3, apparition naturelle d’une idée partagée, aperçu des effets, réponse, puis rechargement et consultation du souvenir sauvegardé. Aucune erreur console observée.
 
 ## Prototype 35 — préparer le prochain concert
 
