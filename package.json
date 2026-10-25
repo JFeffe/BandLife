@@ -1,12 +1,16 @@
 {
   "name": "bandlife",
-  "version": "0.40.0",
+  "version": "0.41.0",
   "private": true,
   "description": "Band Life, simulation musicale et concerts BandLive",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node scripts/test.cjs",
     "test:campaign": "node scripts/campaign-lab.cjs",
-    "build:bandlive": "node scripts/build-bandlive.cjs"
+    "build:bandlive": "node scripts/build-bandlive.cjs",
+    "build": "node scripts/build-coop.cjs",
+    "dev:coop": "node scripts/dev-coop.cjs"
   }
 }

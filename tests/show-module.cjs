@@ -23,6 +23,17 @@ class Element{
  const saved=JSON.stringify(g);await click('bl-cancel');assert.equal(paused,1);assert.equal(JSON.stringify(g),saved);live.refresh();assert.equal(JSON.stringify(g),saved);
  await click('bl-end');clock+=10000;for(const fn of frames.splice(0))fn();await click('bl-simulate');assert.equal(s.tour.active.phase,'result');assert.match(root.innerHTML,/BILAN DU SPECTACLE/);assert.match(root.innerHTML,/Retour à la maison · 22 h/);assert.equal(projection.performance.result.score,s.tour.active.result.score);const energy=s.people.map(p=>p.energy);const result=JSON.stringify(s.tour.active.result);A.update(s,projection);assert.equal(JSON.stringify(s.tour.active.result),result);await click('bl-return');assert.equal(returns,1);assert.equal(s.tour.active.phase,'returning');assert.deepEqual(s.people.map(p=>p.energy),energy);assert(updates>4);live.leave();
  console.log('PASS original Simon UI handlers: song/cards/targets, personal energy, pause, end turn, simulation, report and return through host callbacks.');
+ // Cooperative controls submit commands without mutating the server projection or solo storage.
+ const coopRoot=new Element('coop-view',true);nodes['#bandlive-view']=coopRoot;
+ const coopState=venue();B.chooseSong(coopState.tour.active.live,coopState.tour.active.songs[0].id);coopState.tour.active.live.cooperative=true;
+ const coopWorld=A.world(coopState),commands=[],snapshot=JSON.stringify(coopWorld.performance.bandLive.game);
+ global.localStorage={getItem(){throw Error('Coop read solo storage');},setItem(){throw Error('Coop wrote solo storage');}};
+ const coopUI=createBandLiveModule({getWorld:()=>coopWorld,onOpen(){},onReturn(){},onDisable(){},canStart:()=>true,notify:m=>{throw Error(m);},onCommand:c=>commands.push(c)});
+ coopUI.refresh();assert.match(coopRoot.innerHTML,/Ton passage · coop/);assert(!coopRoot.innerHTML.includes('id="bl-simulate"'));
+ const coopClick=async(id,dataset={})=>{const target={id,dataset,closest:sel=>sel==='[data-bl-style]'?null:target};await coopRoot.emit('click',{target});};
+ const cg=coopWorld.performance.bandLive.game,cn=cg.hand.find(id=>B.cardById(cg,id).kind==='note');await coopClick('',{blCard:cn});coopRoot.geometry=new Element();await coopClick('',{blTarget:cg.fans[0].id});await coopClick('bl-end');
+ assert.deepEqual(commands.map(c=>c.action),['card','end']);assert.equal(commands[0].cardId,cn);assert.equal(JSON.stringify(cg),snapshot);coopUI.leave();nodes['#bandlive-view']=root;
+ console.log('PASS cooperative UI commands preserve the authoritative projection and never access solo saves.');
  // Renderer, interactions and CSS must remain upstream, not be reconstructed.
  const dir=path.join(__dirname,'../vendor/simon'),out=path.join(__dirname,'../dist/show-module');
  const patched=new Set(['bandlive.mjs','bandlive-cards.mjs','bandlive-view.mjs','bandlive-resources.mjs','person-card.mjs']);

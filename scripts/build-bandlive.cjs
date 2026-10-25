@@ -14,6 +14,7 @@ for(const name of modules){
   source=replace(source,'deck.length!==5','deck.length<1');
  }
  if(name==='bandlive'){
+  source=replace(source,'export function totalTurns(game){','export function totalTurns(game){\n  if(game.cooperative)return songTurns(currentSong(game));');
   source=replace(source,'![3,4,5].includes(s.turns)','![3,4,5,6].includes(s.turns)');
   source=replace(source,"s.turns!==undefined&&![3,4,5,6].includes(s.turns)","(s.turns!==undefined&&![3,4,5,6].includes(s.turns)||s.energyPerTurn!==undefined&&![2,3,4,5].includes(s.energyPerTurn))");
   source=replace(source,'game.energy=RULES.energy','game.energy=currentSong(game).energyPerTurn??RULES.energy');
@@ -30,6 +31,21 @@ for(const name of modules){
   source=replace(source,'b.power!==4','!Number.isInteger(b.power)||b.power<0||b.power>4');
   source=replace(source,"!object(a.needs)||!Number.isFinite(a.skill)","!object(a.needs)||!Number.isFinite(a.needs.energy)||a.needs.energy<0||a.needs.energy>100||!Number.isFinite(a.skill)");
  }
+
+ if(name==='bandlive'){
+  // Cooperative turns share one audience resolution, while each band owns its hand.
+  const begin=source.indexOf('export function endTurn(game) {'),end=source.indexOf('\nexport function restoreBandLive',begin);
+  if(begin<0||end<0)throw Error('Upstream cooperative boundary changed');
+  let coop=source.slice(begin,end).trim();
+  coop=replace(coop,'export function endTurn(game) {','export function resolveCoopRound(game,finalSongs,activeIds) {');
+  coop=replace(coop,'game.actors.forEach(a=>a.needs.energy=', 'game.actors.filter(a=>activeIds.includes(a.id)).forEach(a=>a.needs.energy=');
+  coop=replace(coop,'game.discard.push(...game.hand.splice(0));game.boost=0;game.relayBoosts=[];','game.boost=0;game.relayBoosts=[];');
+  coop=replace(coop,'if(game.section===passageTurns(game)){','for(const song of finalSongs){game.songId=song.id;');
+  const tail=coop.indexOf("  if(game.usedSongs.length===2");
+  if(tail<0)throw Error('Upstream cooperative tail changed');
+  coop=coop.slice(0,tail)+'  return {ok:true};\n}';
+  source+='\n'+coop+`\nexport function drawCoopHand(game){game.energy=currentSong(game).energyPerTurn??RULES.energy;game.boost=0;game.relayBoosts=[];draw(game,RULES.hand);}\nexport function resetCoopReactions(game){if(game.reactionVersion)game.fans.forEach(f=>{if(game.reactionVersion>=2&&f.reactionUsed&&f.hp>0)rerollReaction(game,f);clearReactionProgress(f);if(game.reactionVersion>=2)f.reactionUsed=false;});}\n`;
+ }
  fs.writeFileSync(path.join(target,name+'.mjs'),source);
  source=source.replace(/\r\n/g,'\n');
  const exports=[...source.matchAll(/export (?:const|function) (\w+)/g)].map(m=>m[1]);
@@ -45,6 +61,19 @@ fs.writeFileSync(path.join(root,'dist/bandlive.js'),output);
 // Only integration fields/text are patched in Simon's UI; rendering, layout,
 // card hands, drag/drop, targeting, sound and animations remain upstream.
 let view=fs.readFileSync(path.join(target,'bandlive-view.mjs'),'utf8');
+view=replace(view,'onConcertUpdate,onConcertCancel})','onConcertUpdate,onConcertCancel,onCommand=null})');
+view=replace(view,"try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');", "try{const saved=onCommand?null:JSON.parse(localStorage.getItem(STORAGE)||'null');");
+view=replace(view,'function persist(){','function persist(){if(onCommand)return;');
+view=replace(view,'function eveningHTML(show,expanded=false){', 'function eveningHTML(show,expanded=false){if(onCommand)return "";');
+view=replace(view,'function handHTML(actor){', 'function handHTML(actor){if(game.cooperative&&!actor.id.startsWith(game.coopSeat+":"))return `<div class="bl-hand"><span class="bl-empty-hand">Groupe voisin</span></div>`;');
+view=replace(view,'refresh(){syncConcert();lastReport=null;initializeDraft();render();}', 'refresh(){const previous=game?.events.length;syncConcert();lastReport=null;initializeDraft();if(onCommand&&previous!==undefined&&game.events.length>previous){clearDrag();juice(game.events.slice(previous));return;}render();}');
+view=replace(view,'r=playCard(game,id,targetId,options);',"r=onCommand?(onCommand({action:'card',cardId:id,targetId,...options}),{ok:true,event:null,effects:[]}):playCard(game,id,targetId,options);");
+view=replace(view,'    animation={started:performance.now(),origin,events:[r.event,...r.effects]', '    if(onCommand)return true;\n    animation={started:performance.now(),origin,events:[r.event,...r.effects]');
+view=replace(view,"else if(target.id==='bl-end'&&!animation){const start=", "else if(target.id==='bl-end'&&!animation){if(onCommand){selectedCard=null;pendingChoice=null;onCommand({action:'end'});return;}const start=");
+view=replace(view,"target.id==='bl-simulate'&&!animation", "target.id==='bl-simulate'&&!animation&&!onCommand");
+view=replace(view,"${!finished?`<button id=\"bl-simulate\"", "${!finished&&!onCommand?`<button id=\"bl-simulate\"");
+view=replace(view,'function songProgressHTML(){', 'function songProgressHTML(){if(game.cooperative){const song=currentSong(game);return `<div class="bl-song-progress"><span class="bl-song-slot is-current"><small>Ton passage · coop</small><b>${game.section}/${songTurns(song)} tours</b><em>${esc(song.title)}</em></span></div>`;}');
+view=replace(view,'${game.usedSongs.length}/2', '${game.cooperative?"coop":game.usedSongs.length+"/2"}');
 view=replace(view,"const STORAGE='garage-vivant-bandlive-v1'","const STORAGE='maison-bandlive-module-v1'");
 view=replace(view,'Interrompre le show','Fermer · reprendre plus tard');
 view=replace(view,'Retour au quartier · continuer','Retour à la maison · 22 h');

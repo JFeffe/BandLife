@@ -9,3 +9,12 @@ Thumbs.db
 coverage/
 playwright-report/
 test-results/
+
+# Generated cooperative hosting output
+/dist/client/
+/dist/server/
+/dist/.openai/
+/hosting/public/
+/hosting/runtime/
+/.sites-runtime/
+/.wrangler/

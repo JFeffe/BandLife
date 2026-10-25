@@ -215,6 +215,7 @@ function createGame({people,groupId=null,groupName='Le band du quartier',songs,s
 }
 const passageTurns=game=>game.version>=4?songTurns(currentSong(game)):RULES.songTurns;
 function totalTurns(game){
+  if(game.cooperative)return songTurns(currentSong(game));
   if(game.version<4)return RULES.turns;
   const ids=game.songOrder||game.usedSongs,used=ids.reduce((n,id)=>n+songTurns(game.songs.find(s=>s.id===id)),0);
   const remaining=2-ids.length;
@@ -447,7 +448,49 @@ function restoreBandLive(input) {
 }
 
 
-return {RULES,STYLES,CONQUEST_EFFECTS,conquestLabel,conquestDescription,audienceColumns,favoriteStyle,conquestTargets,cardDefinition,cardById,createBandLive,passageTurns,totalTurns,sectionName,currentSong,availableSongs,chooseSong,canPlay,cardTargets,powerAgainst,previewCard,playCard,endTurn,restoreBandLive,INSTRUMENTS,SPECIALS,NOTE};})();
+function resolveCoopRound(game,finalSongs,activeIds) {
+  if(game.phase!=='play')return {ok:false,message:'Le tour est déjà terminé.'};
+  game.actors.filter(a=>activeIds.includes(a.id)).forEach(a=>a.needs.energy=Math.max(0,(a.needs.energy??100)-1));
+  game.boost=0;game.relayBoosts=[];
+  for(const song of finalSongs){game.songId=song.id;
+    const queue=[];
+    const hits=game.fans.filter(f=>f.hp>0).map(f=>{const before=f.hp;f.hp=Math.max(0,f.hp-RULES.finale);conquer(game,f,queue);return {id:f.id,before,after:f.hp,gain:before-f.hp,power:RULES.finale};});
+    game.events.push({id:game.events.length+1,type:'finale',turn:game.turn,hits});
+    log(game,'Finale : 3 puissance sur tout le public.');
+    resolveConquests(game,queue);
+    game.fans.forEach(fan=>{delete fan.chorusStyle;delete fan.spotlight;delete fan.turnStyle;});
+    if(checkVictory(game))return {ok:true};
+  }
+  game.fans.forEach(fan=>{delete fan.spotlight;});
+  if(game.reactionVersion){
+    const triggered=new Set();
+    // One trigger per spectator in this end-of-turn batch. Chains may satisfy
+    // an existing neighbour reaction, but never a freshly rerolled one.
+    for(let pass=0;pass<game.fans.length;pass++){
+      const queue=[];let changed=false;
+      for(const fan of game.fans){
+        if(fan.hp===0||triggered.has(fan.id)||fan.reactionUsed)continue;
+        const bored=fan.intent==='bored'&&!fan.noBoredom&&fan.hp<fan.max;
+        const gain=game.reactionVersion===1&&(fan.intent==='rhythm'&&fan.reactionTempo>=3||fan.intent==='following'&&fan.reactionNeighbor);
+        if(!bored&&!gain)continue;
+        const before=fan.hp;fan.hp=bored?Math.min(fan.max,fan.hp+(REACTIONS.bored.value||3)):Math.max(0,fan.hp-3);
+        triggered.add(fan.id);if(game.reactionVersion>=2)fan.reactionUsed=true;changed=true;
+        game.events.push({id:game.events.length+1,type:'reaction',turn:game.turn,fanId:fan.id,name:REACTIONS[fan.intent].name,hits:[{id:fan.id,before,after:fan.hp,gain:before-fan.hp,power:bored?-3:3}]});
+        log(game,`${fan.name} · ${REACTIONS[fan.intent].name} : ${bored?'−':'+'}${Math.abs(before-fan.hp)} conquête.`);
+        conquer(game,fan,queue);
+      }
+      resolveConquests(game,queue);if(!changed)break;
+    }
+    for(const fan of game.fans)if(game.reactionVersion===1&&triggered.has(fan.id)&&fan.hp>0)rerollReaction(game,fan);
+  }else {for(const fan of game.fans)if(fan.hp>0&&fan.intent==='bored'&&!fan.noBoredom){fan.hp=Math.min(fan.max,fan.hp+RULES.boredom);log(game,`${fan.name} s’ennuie : −3 conquête.`);}}
+  game.fans.forEach(fan=>{delete fan.turnStyle;delete fan.noBoredom;});
+  if(checkVictory(game))return {ok:true};
+  return {ok:true};
+}
+function drawCoopHand(game){game.energy=currentSong(game).energyPerTurn??RULES.energy;game.boost=0;game.relayBoosts=[];draw(game,RULES.hand);}
+function resetCoopReactions(game){if(game.reactionVersion)game.fans.forEach(f=>{if(game.reactionVersion>=2&&f.reactionUsed&&f.hp>0)rerollReaction(game,f);clearReactionProgress(f);if(game.reactionVersion>=2)f.reactionUsed=false;});}
+
+return {RULES,STYLES,CONQUEST_EFFECTS,conquestLabel,conquestDescription,audienceColumns,favoriteStyle,conquestTargets,cardDefinition,cardById,createBandLive,passageTurns,totalTurns,sectionName,currentSong,availableSongs,chooseSong,canPlay,cardTargets,powerAgainst,previewCard,playCard,endTurn,restoreBandLive,resolveCoopRound,drawCoopHand,resetCoopReactions,INSTRUMENTS,SPECIALS,NOTE};})();
 modules["bandlive-auto"]=(()=>{
 const {songTurns}=modules["song-rules"];
 const {availableSongs,chooseSong,canPlay,cardById,cardDefinition,previewCard,playCard,endTurn}=modules["bandlive"];

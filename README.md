@@ -1,14 +1,14 @@
 # Band Life
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 40** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 41** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
-Le lien ci-dessus correspond au jeu publié sur Sites et conserve ses permissions actuelles : il peut demander une connexion ChatGPT autorisée. Le dépôt GitHub est public; le jeu hébergé n’est pas automatiquement rendu public par ce dépôt. Les sauvegardes restent dans le navigateur, sans serveur de données.
+Le jeu publié sur Sites est accessible à toute personne disposant de son lien, à la demande du propriétaire. Le dépôt GitHub est également public. Les sauvegardes solo restent dans le navigateur. Les sessions coop sont sauvegardées côté serveur dans D1; le navigateur conserve la clé de reprise de sa maison.
 
 ## Lancer le projet
 
-Le jeu est autonome et déjà prêt dans `dist/`. Avec Python 3 :
+Le mode solo est autonome et déjà prêt dans `dist/`. Avec Python 3 :
 
 ```sh
 git clone https://github.com/JFeffe/BandLife.git
@@ -17,6 +17,21 @@ python -m http.server 8000 --directory dist
 ```
 
 Ouvrir `http://localhost:8000`. Utiliser un serveur HTTP plutôt qu’ouvrir `index.html` directement, notamment pour les modules du concert.
+
+## Lancer la coop en local
+
+Node.js 22.13+ est nécessaire. Depuis la racine :
+
+```sh
+npm ci --prefix hosting
+npm run build
+cd hosting
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_closed_blue_blade.sql
+cd ..
+npm run dev:coop
+```
+
+L'initialisation SQL est à faire une seule fois par nouvelle base locale. Ouvrir `http://localhost:5173/coop.html` dans deux onglets. Créer un quartier dans le premier et rejoindre son code dans le second. Les onglets ont des clés de joueur distinctes. Pour jouer sur deux ordinateurs, utiliser le site publié. Le serveur Python ne fournit pas l'API coop.
 
 ## Tests et reconstruction
 
@@ -27,7 +42,7 @@ npm test
 npm run build:bandlive
 ```
 
-`npm test` exécute les 37 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `npm run test:campaign` produit le détail JSON de neuf campagnes chronologiques reproductibles. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
+`npm test` exécute les 38 suites de régression et renvoie une erreur si l’une échoue. GitHub Actions les exécute aussi sur chaque push et pull request. `npm run test:campaign` produit le détail JSON de neuf campagnes chronologiques reproductibles. `build:bandlive` reconstruit uniquement le module de concert à partir des sources conservées dans `vendor/simon/`.
 
 ## Contenu et mises à jour
 
@@ -35,10 +50,29 @@ npm run build:bandlive
 - `vendor/` : sources originales des modules intégrés et leurs références `UPSTREAM.md`.
 - `scripts/` : reconstruction et lanceur de tests.
 - `tests/` : tests des mécaniques, sauvegardes, interface et concerts.
-- `.openai/hosting.json` : identité du site existant et dossier à publier.
+- `server/` : commandes coop validées, projection par joueur et persistance D1.
+- `hosting/` : serveur Vinext/Cloudflare, dépendances verrouillées et schéma.
+- `drizzle/` : migrations publiées, recopiées depuis `hosting/drizzle/` au build.
+- `.openai/hosting.json` : identité du site existant et liaison D1.
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 41 — deux maisons, une scène
+
+L'accueil propose **Jouer en coop**. Un joueur crée le quartier et partage le code de huit caractères; l'autre choisit son trio et rejoint la maison voisine. Le site est accessible par son lien; le code du quartier invite un seul partenaire dans la session.
+
+- Les deux maisons et leurs musiciens sont visibles dans le même quartier, avec un accès à chaque maison et une vue d'ensemble.
+- Chacun choisit répétition, composition, essai ou repos. Les rendez-vous de 10 h, 17 h et minuit avancent après les deux validations. Les répétitions utilisent les règles de préparation et la fatigue du jeu.
+- Chaque groupe choisit une chanson prête. Pendant le concert, les six musiciens partagent le public, le tempo et les réactions; chaque joueur dispose de ses propres cartes et de son énergie de tour. Les commandes sont résolues dans l'ordre reçu et le prochain tour attend les deux fins de tour.
+- La victoire est commune et donne une carte à chaque groupe. Les chansons peuvent avoir des durées différentes : le groupe qui termine attend l'autre. Le retour conserve la fatigue et place le prochain concert quatre semaines après le précédent.
+- Les sessions sont sauvegardées après chaque action. Les tentatives répétées d'une même commande ne doublent pas ses effets; une reconnexion reprend le dernier état confirmé. Le bouton de reprise retrouve la maison sur ce navigateur. Le code seul ne permet pas de prendre une maison déjà occupée.
+
+**Périmètre du prototype :** départ en semaine 7 avec un morceau adopté et un projet par groupe, préparation puis concerts communs répétables. La campagne coop sur quatre actes, le recrutement et les interactions entre maisons restent à développer. Il n'y a pas encore de reprise de sa maison depuis un autre appareil, ni de partie alternée : cette version explore le jeu simultané. Les sauvegardes solo restent indépendantes.
+
+`npm run build:bandlive` conserve les sources de Simon et ajoute les adaptateurs coop. `npm run build` prépare le runtime et les ressources, puis produit le Worker et ses assets pour le même site. La configuration de publication passe de statique à Worker + D1; les assets du solo et ses clés de sauvegarde restent inchangés.
+
+Validation : 38 suites de régression, dont isolation des mains, actions concurrentes, double envoi, durée différente des chansons, victoire/récompenses et reprise. Vérification du parcours de préparation et du concert avec deux onglets connectés à une base D1 locale.
 
 ## Prototype 40 — scrapper sans perdre sa composition
 

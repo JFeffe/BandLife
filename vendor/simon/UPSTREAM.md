@@ -26,3 +26,5 @@ Les nouvelles règles du public et la grille sont celles de la version 0.8.15.
 Un show commencé conserve cartes, conquête, RNG, chansons, réactions et énergie.
 Les résultats sont appliqués une seule fois; l’énergie reste identique pendant
 le trajet et le rangement à la maison.
+
+Prototype 41 : le build ajoute une résolution commune des fins de tour, des mains indépendantes et un callback réseau optionnel dans la vue. Les commandes coop passent par `server/coop-core.cjs`; `coop-entry.mjs` relie le même renderer au serveur. Les feuilles de style, les interactions et le renderer amont restent intacts.
