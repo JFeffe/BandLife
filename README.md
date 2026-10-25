@@ -1,6 +1,6 @@
 # BandLife — La Maison des Accords
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 37** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 38** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -39,6 +39,12 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 38 — les semaines à venir, sans espace perdu
+
+La barre retire son bloc « La maison », l’indicateur d’état et le nombre de musiciens. Les horaires occupent une zone plus étroite. La frise commence toujours par la semaine actuelle, en bleu avec le repère « ici », puis affiche les semaines à venir : douze sur écran large, huit ou six selon la place disponible. Les concerts sont signalés en doré; les étapes déjà passées ne restent plus dans le résumé. Le nom de la scène ouvre toujours les destinations.
+
+Validation : 37 suites, dont le décalage de la frise, l’absence de semaines passées, les reports de finale et les changements d’acte. Vérification dans le navigateur aux largeurs étroite et de référence : barre de 62 px, sans débordement ni erreur console. Les sauvegardes et la simulation restent compatibles.
 
 ## Prototype 37 — les dates dans la barre de la maison
 
