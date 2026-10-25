@@ -1,6 +1,6 @@
 # Band Life
 
-**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 39** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
+**[▶ Jouer à la version actuelle](https://la-maison-des-accords.docile-hero-2836.chatgpt.site)** · **Prototype 40** · [Dépôt GitHub](https://github.com/JFeffe/BandLife)
 
 Simulation d’un groupe de musiciens : vie dans la maison, composition, répétitions et concerts BandLive. Le parcours comporte quatre actes, de la scène locale à la reconnaissance mondiale.
 
@@ -39,6 +39,14 @@ npm run build:bandlive
 - `AGENTS.md` : consignes de maintenance et publication.
 
 À chaque version livrée, mettre à jour ce dépôt et publier le jeu sur le même lien. Les deux publications sont distinctes : un push GitHub seul ne déploie pas le site ChatGPT. Vérifier chacune avant d’annoncer la mise à jour. Ne jamais inclure d’identifiants, de sauvegardes personnelles ou de fichiers temporaires. Les références et attributions des modules externes restent dans `vendor/`.
+
+## Prototype 40 — scrapper sans perdre sa composition
+
+Dans « Le répertoire → À essayer », chaque chanson non adoptée propose **Scrapper**, même avant son premier vote. Après confirmation, elle quitte toutes les listes collectives, mais reste consultable dans la fiche Musique de chacun de ses auteurs, avec la mention « Scrappée · conservée ici ». Elle ne peut plus être proposée, répétée ou retravaillée. Ses crédits et ses caractéristiques restent conservés dans les sauvegardes.
+
+Les invitations, intentions et reprises suspendues associées sont annulées. Une chanson en cours d’essai ne peut pas être scrappée avant la fin de la séance. Le wiki et les confirmations expliquent ce comportement, qui remplace l’ancienne suppression définitive.
+
+Validation : 37 suites de régression; essai réel dans le navigateur du retrait depuis « À essayer », puis de la consultation dans la fiche de l’auteur. Aucun changement au module de concert.
 
 ## Prototype 39 — Band Life, concerts et répétitions
 
